@@ -2,15 +2,27 @@ package app.flipday.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.ExperimentalTextApi
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontVariation
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import app.flipday.R
 
-// TODO(fonts): the design uses IBM Plex Sans, IBM Plex Sans Arabic and Space Grotesk (numerals).
-// Add the font files under res/font and replace the system families below. Until then the system sans is used.
-val Plex: FontFamily = FontFamily.SansSerif
-val PlexArabic: FontFamily = FontFamily.SansSerif
-val Numerals: FontFamily = FontFamily.SansSerif
+// Bundled fonts (SIL Open Font License, see docs/licenses): IBM Plex Sans, IBM Plex Sans Arabic, Space Grotesk for the flap digits.
+@OptIn(ExperimentalTextApi::class)
+private fun variable(res: Int, w: FontWeight) = Font(res, w, FontStyle.Normal, FontVariation.Settings(FontVariation.weight(w.weight)))
+
+private val Weights = listOf(FontWeight.Normal, FontWeight.Medium, FontWeight.SemiBold, FontWeight.Bold)
+
+val Plex: FontFamily = FontFamily(Weights.map { variable(R.font.ibm_plex_sans, it) })
+val PlexArabic: FontFamily = FontFamily(
+    Font(R.font.ibm_plex_sans_arabic_regular, FontWeight.Normal), Font(R.font.ibm_plex_sans_arabic_medium, FontWeight.Medium),
+    Font(R.font.ibm_plex_sans_arabic_semibold, FontWeight.SemiBold), Font(R.font.ibm_plex_sans_arabic_bold, FontWeight.Bold),
+)
+val Numerals: FontFamily = FontFamily(Weights.map { variable(R.font.space_grotesk, it) })
 
 fun appTypography(arabic: Boolean): Typography {
     val f = if (arabic) PlexArabic else Plex

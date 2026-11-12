@@ -19,8 +19,20 @@ android {
         resourceConfigurations += listOf("en", "ar")
     }
 
+    // Release signing comes from environment variables so no secret is in the repo. Without them the release build is unsigned.
+    val keystorePath = System.getenv("FLIPDAY_KEYSTORE_PATH")
+    signingConfigs {
+        if (keystorePath != null) create("release") {
+            storeFile = file(keystorePath)
+            storePassword = System.getenv("FLIPDAY_KEYSTORE_PASSWORD")
+            keyAlias = System.getenv("FLIPDAY_KEY_ALIAS")
+            keyPassword = System.getenv("FLIPDAY_KEY_PASSWORD")
+        }
+    }
+
     buildTypes {
         release {
+            if (keystorePath != null) signingConfig = signingConfigs.getByName("release")
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")

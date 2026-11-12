@@ -133,6 +133,10 @@ fun WidgetsScreen(factory: ViewModelProvider.Factory) {
         listOf(
             Triple(WidgetTemplate.FLAP, R.string.style_flap, R.string.style_flap_desc),
             Triple(WidgetTemplate.PAPER, R.string.style_paper, R.string.style_paper_desc),
+            Triple(WidgetTemplate.RING, R.string.style_ring, R.string.style_ring_desc),
+            Triple(WidgetTemplate.AGE, R.string.style_age, R.string.style_age_desc),
+            Triple(WidgetTemplate.DATE, R.string.style_date, R.string.style_date_desc),
+            Triple(WidgetTemplate.TICKER, R.string.style_ticker, R.string.style_ticker_desc),
         ).forEach { (template, name, desc) ->
             Surface(shape = MaterialTheme.shapes.large, color = MaterialTheme.colorScheme.surface, modifier = Modifier.fillMaxWidth()) {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {

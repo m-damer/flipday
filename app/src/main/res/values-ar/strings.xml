@@ -257,4 +257,17 @@
         <item quantity="other">يتوقف العدّاد عند %1$s يوم. يتحوّل الحدث إلى فترة يمكنك فتحها.</item>
     </plurals>
     <string name="mark_ended_confirm">إنهاء اليوم</string>
+    <string name="style_ring">حلقة</string>
+    <string name="style_age">العمر</string>
+    <string name="style_date">التاريخ</string>
+    <string name="style_ticker">عدّاد حيّ</string>
+    <string name="style_ring_desc">حلقة تُظهر نسبة الوقت المنقضي.</string>
+    <string name="style_age_desc">العمر بلوحات الفلاب مع موعد العيد القادم.</string>
+    <string name="style_date_desc">التاريخ ككتلة مع الأيام المتبقية.</string>
+    <string name="style_ticker_desc">أيام وساعات ودقائق. يتحدّث كل ١٥ دقيقة تقريبًا وعند فتح القفل.</string>
+    <string name="ticker_days">أيام</string>
+    <string name="ticker_hours">ساعات</string>
+    <string name="ticker_minutes">دقائق</string>
+    <string name="widget_updated">حُدّث %1$s</string>
+    <string name="widget_turns">تبلغ %1$s</string>
 </resources>

@@ -10,6 +10,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.size
@@ -133,6 +135,7 @@ class WidgetConfigActivity : AppCompatActivity() {
                                 p[WidgetKeys.SHOW_UNIT] = showUnit
                             }
                             FlipdayWidget().update(this@WidgetConfigActivity, gid)
+                            WidgetRefresher.scheduleTickerIfNeeded(applicationContext)
                             setResult(Activity.RESULT_OK, Intent().putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId))
                             finish()
                         }
@@ -149,9 +152,11 @@ class WidgetConfigActivity : AppCompatActivity() {
                         items(active, key = { it.id }) { e -> ChoiceRow(e.title, eventId == e.id) { eventId = e.id } }
                         item { Label(stringResource(R.string.widget_style)) }
                         item {
-                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                FilterChip(selected = template == WidgetTemplate.FLAP, onClick = { template = WidgetTemplate.FLAP }, label = { Text(stringResource(R.string.style_flap)) })
-                                FilterChip(selected = template == WidgetTemplate.PAPER, onClick = { template = WidgetTemplate.PAPER }, label = { Text(stringResource(R.string.style_paper)) })
+                            Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                listOf(
+                                    WidgetTemplate.FLAP to R.string.style_flap, WidgetTemplate.PAPER to R.string.style_paper, WidgetTemplate.RING to R.string.style_ring,
+                                    WidgetTemplate.AGE to R.string.style_age, WidgetTemplate.DATE to R.string.style_date, WidgetTemplate.TICKER to R.string.style_ticker,
+                                ).forEach { (t, label) -> FilterChip(selected = template == t, onClick = { template = t }, label = { Text(stringResource(label)) }) }
                             }
                         }
                         item { Label(stringResource(R.string.widget_colors)) }

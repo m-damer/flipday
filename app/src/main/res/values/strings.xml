@@ -217,4 +217,17 @@
         <item quantity="other">The counter stops at %1$s days. The event becomes a period you can still open.</item>
     </plurals>
     <string name="mark_ended_confirm">End today</string>
+    <string name="style_ring">Ring</string>
+    <string name="style_age">Age</string>
+    <string name="style_date">Date</string>
+    <string name="style_ticker">Live ticker</string>
+    <string name="style_ring_desc">A ring shows how much of the time has passed.</string>
+    <string name="style_age_desc">Age as flap tiles, with the next birthday.</string>
+    <string name="style_date_desc">The date as a block, with the days left.</string>
+    <string name="style_ticker_desc">Days, hours and minutes. Updates about every 15 minutes and when you unlock.</string>
+    <string name="ticker_days">Days</string>
+    <string name="ticker_hours">Hrs</string>
+    <string name="ticker_minutes">Min</string>
+    <string name="widget_updated">updated %1$s</string>
+    <string name="widget_turns">Turns %1$s</string>
 </resources>

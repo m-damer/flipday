@@ -14,8 +14,14 @@ object WidgetKeys {
     val SHOW_UNIT = booleanPreferencesKey("show_unit")
 }
 
-/** FLAP: flap tiles on a card. PAPER: teal card with plain numerals. */
-enum class WidgetTemplate { FLAP, PAPER;
+/**
+ * FLAP: flap tiles on a card. PAPER: colour card with plain numerals. RING: progress ring around the count.
+ * AGE: age with a "turns" line. DATE: the target date as a block. TICKER: days, hours and minutes (refreshed about every 15 minutes).
+ * Every style except PAPER sits on the neutral card and follows light and dark.
+ */
+enum class WidgetTemplate { FLAP, PAPER, RING, AGE, DATE, TICKER;
+    val onCard: Boolean get() = this != PAPER
+
     companion object { fun parse(s: String?): WidgetTemplate = entries.firstOrNull { it.name == s } ?: FLAP }
 }
 

@@ -5,6 +5,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import app.flipday.AppContainer
 import app.flipday.core.Event
+import app.flipday.core.EventQueries
+import app.flipday.core.EventQuery
+import app.flipday.core.EventSort
 import app.flipday.core.EventType
 import app.flipday.core.NumeralMode
 import app.flipday.data.AppSettings
@@ -14,27 +17,31 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-
-enum class EventFilter { ALL, COUNTDOWN, BIRTHDAYS, COUNTUP }
+import java.time.LocalDate
 
 class EventsViewModel(private val c: AppContainer) : ViewModel() {
-    private val filter = MutableStateFlow(EventFilter.ALL)
-    val selected: StateFlow<EventFilter> = filter
+    private val queryState = MutableStateFlow(EventQuery())
+    val query: StateFlow<EventQuery> = queryState
 
-    val events: StateFlow<List<Event>?> = combine(c.repository.observeEvents(), filter) { all, f ->
-        all.filter { it.archivedOn == null }.filter {
-            when (f) {
-                EventFilter.ALL -> true
-                EventFilter.COUNTDOWN -> it.type == EventType.COUNTDOWN
-                EventFilter.BIRTHDAYS -> it.type == EventType.AGE
-                EventFilter.COUNTUP -> it.type == EventType.COUNTUP
-            }
+    init {
+        viewModelScope.launch {
+            val days = c.settings.settings.first().archiveAfterDays
+            c.repository.archiveFinished(LocalDate.now(), days)
         }
+    }
+
+    val events: StateFlow<List<Event>?> = combine(c.repository.observeEvents(), queryState) { all, q ->
+        EventQueries.active(all, q, LocalDate.now())
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
-    fun setFilter(f: EventFilter) { filter.value = f }
+    fun setType(t: EventType?) { queryState.value = queryState.value.copy(type = t) }
+    fun apply(sort: EventSort, showCompleted: Boolean, type: EventType?) {
+        queryState.value = queryState.value.copy(sort = sort, showCompleted = showCompleted, type = type)
+    }
+    fun reset() { queryState.value = EventQuery() }
 
     val undo: StateFlow<Event?> = c.pendingUndo
 
@@ -45,6 +52,18 @@ class EventsViewModel(private val c: AppContainer) : ViewModel() {
     }
 
     fun dismissUndo() { c.pendingUndo.value = null }
+}
+
+class SearchViewModel(private val c: AppContainer) : ViewModel() {
+    val all: StateFlow<List<Event>> = c.repository.observeEvents().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+}
+
+class ArchiveViewModel(private val c: AppContainer) : ViewModel() {
+    private val type = MutableStateFlow<EventType?>(null)
+    val selected: StateFlow<EventType?> = type
+    val events: StateFlow<List<Event>?> = combine(c.repository.observeEvents(), type) { all, t -> EventQueries.archived(all, t) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+    fun setType(t: EventType?) { type.value = t }
 }
 
 class EditorViewModel(private val c: AppContainer) : ViewModel() {
@@ -70,6 +89,14 @@ class DetailViewModel(private val c: AppContainer) : ViewModel() {
         }
     }
 
+    fun archive(event: Event) { viewModelScope.launch { c.repository.archive(event, LocalDate.now()) } }
+
+    fun restore(event: Event) { viewModelScope.launch { c.repository.restore(event) } }
+
+    fun duplicate(event: Event, newTitle: String, onDone: (Long) -> Unit) {
+        viewModelScope.launch { onDone(c.repository.duplicate(event, newTitle)) }
+    }
+
     fun repeatNextYear(event: Event) {
         viewModelScope.launch { c.repository.save(event.copy(date = event.date.plusYears(1), startDate = event.date)) }
     }
@@ -86,6 +113,8 @@ class AppViewModelFactory(private val c: AppContainer) : ViewModelProvider.Facto
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T = when (modelClass) {
         EventsViewModel::class.java -> EventsViewModel(c)
+        SearchViewModel::class.java -> SearchViewModel(c)
+        ArchiveViewModel::class.java -> ArchiveViewModel(c)
         EditorViewModel::class.java -> EditorViewModel(c)
         DetailViewModel::class.java -> DetailViewModel(c)
         SettingsViewModel::class.java -> SettingsViewModel(c)

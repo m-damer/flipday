@@ -34,7 +34,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import app.flipday.R
+import app.flipday.ui.events.ArchiveScreen
 import app.flipday.ui.events.DetailScreen
+import app.flipday.ui.events.SearchScreen
 import app.flipday.ui.events.EditorScreen
 import app.flipday.ui.events.EventsScreen
 import app.flipday.ui.settings.AboutScreen
@@ -44,7 +46,7 @@ import app.flipday.ui.settings.WidgetsScreen
 
 object Routes {
     const val EVENTS = "events"; const val WIDGETS = "widgets"; const val SETTINGS = "settings"
-    const val ADD = "add"; const val EDIT = "edit/{id}"; const val DETAIL = "detail/{id}"; const val ABOUT = "about"; const val DEVELOPER = "developer"
+    const val ADD = "add"; const val SEARCH = "search"; const val ARCHIVE = "archive"; const val EDIT = "edit/{id}"; const val DETAIL = "detail/{id}"; const val ABOUT = "about"; const val DEVELOPER = "developer"
 }
 
 private data class Tab(val route: String, val label: Int, val icon: ImageVector)
@@ -105,16 +107,22 @@ fun FlipdayRoot(factory: ViewModelProvider.Factory) {
         },
     ) { padding ->
         NavHost(nav, startDestination = Routes.EVENTS, modifier = Modifier.padding(padding)) {
-            composable(Routes.EVENTS) { EventsScreen(factory, onOpen = { nav.navigate("detail/$it") }) }
+            composable(Routes.EVENTS) { EventsScreen(factory, onOpen = { nav.navigate("detail/$it") }, onSearch = { nav.navigate(Routes.SEARCH) }, onArchive = { nav.navigate(Routes.ARCHIVE) }) }
             composable(Routes.WIDGETS) { WidgetsScreen() }
             composable(Routes.SETTINGS) { SettingsScreen(factory, onAbout = { nav.navigate(Routes.ABOUT) }) }
+            composable(Routes.SEARCH) { SearchScreen(factory, onBack = { nav.popBackStack() }, onOpen = { nav.navigate("detail/$it") }) }
+            composable(Routes.ARCHIVE) {
+                ArchiveScreen(factory, onBack = { nav.popBackStack() }, onOpen = { nav.navigate("detail/$it") }, onChangeArchiveTime = {
+                    nav.navigate(Routes.SETTINGS) { popUpTo(nav.graph.findStartDestination().id) { saveState = true }; launchSingleTop = true; restoreState = true }
+                })
+            }
             composable(Routes.ADD) { EditorScreen(factory, eventId = null, onClose = { nav.popBackStack() }) }
             composable(Routes.EDIT, arguments = listOf(navArgument("id") { type = NavType.LongType })) {
                 EditorScreen(factory, eventId = it.arguments?.getLong("id"), onClose = { nav.popBackStack() })
             }
             composable(Routes.DETAIL, arguments = listOf(navArgument("id") { type = NavType.LongType })) {
                 val id = it.arguments?.getLong("id") ?: 0L
-                DetailScreen(factory, id, onBack = { nav.popBackStack() }, onEdit = { e -> nav.navigate("edit/$e") })
+                DetailScreen(factory, id, onBack = { nav.popBackStack() }, onEdit = { e -> nav.navigate("edit/$e") }, onOpenEvent = { n -> nav.navigate("detail/$n") })
             }
             composable(Routes.ABOUT) { AboutScreen(onBack = { nav.popBackStack() }, onDeveloper = { nav.navigate(Routes.DEVELOPER) }) }
             composable(Routes.DEVELOPER) { DeveloperScreen(onBack = { nav.popBackStack() }) }

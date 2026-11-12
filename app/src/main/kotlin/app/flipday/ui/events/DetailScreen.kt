@@ -12,9 +12,14 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.foundation.layout.Box
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -54,7 +59,7 @@ import java.time.format.FormatStyle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DetailScreen(factory: ViewModelProvider.Factory, eventId: Long, onBack: () -> Unit, onEdit: (Long) -> Unit) {
+fun DetailScreen(factory: ViewModelProvider.Factory, eventId: Long, onBack: () -> Unit, onEdit: (Long) -> Unit, onOpenEvent: (Long) -> Unit) {
     val vm: DetailViewModel = viewModel(factory = factory)
     val settingsVm: SettingsViewModel = viewModel(factory = factory)
     val settings by settingsVm.settings.collectAsState()
@@ -66,6 +71,8 @@ fun DetailScreen(factory: ViewModelProvider.Factory, eventId: Long, onBack: () -
     fun n(v: Any) = NumeralFormatter.format(v.toString(), settings.numerals, tag)
     fun d(date: LocalDate) = NumeralFormatter.format(date.format(fmt), settings.numerals, tag)
 
+    val context = LocalContext.current
+    var menuOpen by remember { mutableStateOf(false) }
     var confirmDelete by remember { mutableStateOf(false) }
     var offerRepeat by remember { mutableStateOf(false) }
     val e = event
@@ -79,15 +86,25 @@ fun DetailScreen(factory: ViewModelProvider.Factory, eventId: Long, onBack: () -
             title = {},
             navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back)) } },
             actions = {
-                IconButton(onClick = { onEdit(eventId) }, enabled = e != null) { Icon(Icons.Filled.Edit, contentDescription = stringResource(R.string.action_edit)) }
-                IconButton(onClick = { confirmDelete = true }, enabled = e != null) { Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.action_delete)) }
+                if (e != null && e.archivedOn == null) Box {
+                    IconButton(onClick = { menuOpen = true }) { Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.more_options)) }
+                    DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                        DropdownMenuItem(text = { Text(stringResource(R.string.action_edit)) }, onClick = { menuOpen = false; onEdit(eventId) })
+                        DropdownMenuItem(text = { Text(stringResource(R.string.action_duplicate)) }, onClick = {
+                            menuOpen = false
+                            vm.duplicate(e, context.getString(R.string.duplicate_title, e.title), onOpenEvent)
+                        })
+                        DropdownMenuItem(text = { Text(stringResource(R.string.action_archive)) }, onClick = { menuOpen = false; vm.archive(e); onBack() })
+                        DropdownMenuItem(text = { Text(stringResource(R.string.action_delete), color = MaterialTheme.colorScheme.error) }, onClick = { menuOpen = false; confirmDelete = true })
+                    }
+                }
             },
         )
     }) { padding ->
         if (e == null) return@Scaffold
         val (value, unit) = headline(e, today)
         val digits = n(value.toString().padStart(2, '0'))
-        val description = LocalContext.current.resources.getQuantityString(R.plurals.cd_event, value.toInt(), e.title, value.toInt())
+        val description = context.resources.getQuantityString(R.plurals.cd_event, value.toInt(), e.title, value.toInt())
         Column(
             Modifier.fillMaxSize().padding(padding).padding(24.dp).verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -106,7 +123,14 @@ fun DetailScreen(factory: ViewModelProvider.Factory, eventId: Long, onBack: () -
                 EventType.COUNTUP -> Text(stringResource(R.string.detail_started, d(e.date)), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 EventType.COUNTDOWN -> Unit
             }
-            if (ArchivePolicy.shouldOfferRepeat(e, today)) {
+            if (e.archivedOn != null) {
+                Text(stringResource(R.string.archived_on, d(e.archivedOn!!)), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Button(onClick = { vm.restore(e) }, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.restore)) }
+                OutlinedButton(
+                    onClick = { confirmDelete = true }, modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
+                ) { Text(stringResource(R.string.delete_forever)) }
+            } else if (ArchivePolicy.shouldOfferRepeat(e, today)) {
                 TextButton(onClick = { offerRepeat = true }) { Text(stringResource(R.string.repeat_title)) }
             }
         }

@@ -123,4 +123,29 @@
         <item quantity="one">%1$s day before</item>
         <item quantity="other">%1$s days before</item>
     </plurals>
+    <string name="search_events">Search events</string>
+    <string name="search_none_title">No results for \u201c%1$s\u201d</string>
+    <string name="search_none_body">Check the spelling or try a different word. Archived events are included.</string>
+    <string name="clear">Clear</string>
+    <string name="more_options">More options</string>
+    <string name="menu_sort_filter">Sort and filter</string>
+    <string name="menu_archive">Archive</string>
+    <string name="action_archive">Archive</string>
+    <string name="action_duplicate">Duplicate</string>
+    <string name="duplicate_title">%1$s (copy)</string>
+    <string name="sort_by">SORT BY</string>
+    <string name="sort_nearest">Date (nearest first)</string>
+    <string name="sort_added">Date added</string>
+    <string name="sort_name">Name</string>
+    <string name="filter_show">SHOW</string>
+    <string name="show_completed">Show completed events</string>
+    <string name="reset">Reset</string>
+    <string name="apply">Apply</string>
+    <string name="filter_past">Past</string>
+    <string name="archive_empty_title">Nothing archived yet</string>
+    <string name="archive_empty_body">Finished events move here after 7 days. You can restore them any time.</string>
+    <string name="archive_change_time">Change archive time</string>
+    <string name="archived_on">Archived %1$s</string>
+    <string name="restore">Restore</string>
+    <string name="delete_forever">Delete forever</string>
 </resources>

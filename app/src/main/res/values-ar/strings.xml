@@ -139,4 +139,29 @@
         <item quantity="many">قبل %1$s يومًا</item>
         <item quantity="other">قبل %1$s يوم</item>
     </plurals>
+    <string name="search_events">ابحث في الأحداث</string>
+    <string name="search_none_title">لا نتائج لـ «%1$s»</string>
+    <string name="search_none_body">تحقق من الإملاء أو جرّب كلمة أخرى. البحث يشمل الأحداث المؤرشفة.</string>
+    <string name="clear">مسح</string>
+    <string name="more_options">المزيد</string>
+    <string name="menu_sort_filter">الترتيب والتصفية</string>
+    <string name="menu_archive">الأرشيف</string>
+    <string name="action_archive">أرشفة</string>
+    <string name="action_duplicate">إنشاء نسخة</string>
+    <string name="duplicate_title">%1$s (نسخة)</string>
+    <string name="sort_by">الترتيب حسب</string>
+    <string name="sort_nearest">التاريخ (الأقرب أولًا)</string>
+    <string name="sort_added">تاريخ الإضافة</string>
+    <string name="sort_name">الاسم</string>
+    <string name="filter_show">عرض</string>
+    <string name="show_completed">إظهار الأحداث المنتهية</string>
+    <string name="reset">إعادة ضبط</string>
+    <string name="apply">تطبيق</string>
+    <string name="filter_past">منتهية</string>
+    <string name="archive_empty_title">لا أحداث مؤرشفة بعد</string>
+    <string name="archive_empty_body">تنتقل الأحداث المنتهية إلى هنا بعد ٧ أيام، ويمكنك استعادتها في أي وقت.</string>
+    <string name="archive_change_time">تغيير مدة الأرشفة</string>
+    <string name="archived_on">أُرشف في %1$s</string>
+    <string name="restore">استعادة</string>
+    <string name="delete_forever">حذف نهائيًا</string>
 </resources>

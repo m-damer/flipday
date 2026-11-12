@@ -8,6 +8,10 @@ import kotlinx.coroutines.flow.map
 class EventRepository(private val dao: EventDao, private val scheduler: ReminderScheduler) {
     fun observeEvents(): Flow<List<Event>> = dao.observeAll().map { list -> list.map { it.toDomain() } }
 
+    fun observe(id: Long): Flow<Event?> = observeEvents().map { list -> list.firstOrNull { it.id == id } }
+
+    suspend fun get(id: Long): Event? = dao.getById(id)?.toDomain()
+
     suspend fun all(): List<Event> = dao.getAll().map { it.toDomain() }
 
     suspend fun save(event: Event): Long {

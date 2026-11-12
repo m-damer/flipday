@@ -30,9 +30,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import app.flipday.R
 import app.flipday.core.Event
-import app.flipday.core.EventCalculator
-import app.flipday.core.EventPhase
-import app.flipday.core.EventType
 import app.flipday.core.NumeralFormatter
 import app.flipday.core.NumeralMode
 import app.flipday.ui.EventFilter
@@ -44,7 +41,7 @@ import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
 @Composable
-fun EventsScreen(factory: ViewModelProvider.Factory) {
+fun EventsScreen(factory: ViewModelProvider.Factory, onOpen: (Long) -> Unit) {
     val vm: EventsViewModel = viewModel(factory = factory)
     val settingsVm: SettingsViewModel = viewModel(factory = factory)
     val events by vm.events.collectAsState()
@@ -73,7 +70,7 @@ fun EventsScreen(factory: ViewModelProvider.Factory) {
             list == null -> Unit
             list.isEmpty() -> EmptyState()
             else -> LazyColumn(contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                items(list, key = { it.id }) { EventRow(it, today, settings.numerals, locale.toLanguageTag()) }
+                items(list, key = { it.id }) { EventRow(it, today, settings.numerals, locale.toLanguageTag(), onClick = { onOpen(it.id) }) }
             }
         }
     }
@@ -89,22 +86,15 @@ private fun EmptyState() {
 }
 
 @Composable
-private fun EventRow(event: Event, today: LocalDate, numerals: NumeralMode, tag: String) {
+private fun EventRow(event: Event, today: LocalDate, numerals: NumeralMode, tag: String, onClick: () -> Unit) {
     val context = LocalContext.current
     val locale = LocalConfiguration.current.locales[0]
-    val (value, unit) = when (event.type) {
-        EventType.COUNTDOWN -> {
-            if (EventCalculator.phase(event.date, today) == EventPhase.TODAY) 0L to R.string.state_today
-            else maxOf(0L, EventCalculator.daysUntil(event.date, today)) to R.string.label_days
-        }
-        EventType.AGE -> EventCalculator.age(event.date, today).years.toLong() to R.string.label_years_old
-        EventType.COUNTUP -> EventCalculator.daysSince(event.date, today) to R.string.label_since
-    }
+    val (value, unit) = headline(event, today)
     val digits = NumeralFormatter.format(value.toString().padStart(2, '0'), numerals, tag)
     val description = context.resources.getQuantityString(R.plurals.cd_event, value.toInt(), event.title, value.toInt())
     val shownDate = event.date.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(locale))
 
-    Surface(shape = MaterialTheme.shapes.small, color = MaterialTheme.colorScheme.surface, modifier = Modifier.fillMaxWidth()) {
+    Surface(onClick = onClick, shape = MaterialTheme.shapes.small, color = MaterialTheme.colorScheme.surface, modifier = Modifier.fillMaxWidth()) {
         Row(Modifier.padding(horizontal = 16.dp, vertical = 14.dp), verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
                 Text(event.title, style = MaterialTheme.typography.titleMedium)

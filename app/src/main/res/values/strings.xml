@@ -97,4 +97,30 @@
         <item quantity="one">%1$s, %2$d day left</item>
         <item quantity="other">%1$s, %2$d days left</item>
     </plurals>
+    <string name="new_event">New event</string>
+    <string name="edit_event">Edit event</string>
+    <string name="field_time">Time</string>
+    <string name="time_none">No time</string>
+    <string name="time_set">Set time</string>
+    <string name="remind_title">Remind me</string>
+    <string name="remind_on_day">On the day</string>
+    <string name="repeat_yearly">Repeat every year</string>
+    <string name="action_edit">Edit</string>
+    <string name="action_delete">Delete</string>
+    <string name="delete_title">Delete this event?</string>
+    <string name="delete_body">\u201c%1$s\u201d and its widgets will be removed. You can undo right after.</string>
+    <string name="deleted_snack">Event deleted</string>
+    <string name="undo">Undo</string>
+    <string name="state_done">Done</string>
+    <string name="detail_next_birthday">Next birthday: %1$s</string>
+    <string name="detail_turns">Turns %1$s</string>
+    <string name="detail_started">Started %1$s</string>
+    <string name="repeat_title">Count again next year?</string>
+    <string name="repeat_body">\u201c%1$s\u201d will count down to %2$s.</string>
+    <string name="repeat_no">No, keep as is</string>
+    <string name="repeat_yes">Yes, repeat</string>
+    <plurals name="remind_days_before">
+        <item quantity="one">%1$s day before</item>
+        <item quantity="other">%1$s days before</item>
+    </plurals>
 </resources>

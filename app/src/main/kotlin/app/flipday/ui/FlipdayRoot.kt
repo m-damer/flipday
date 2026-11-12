@@ -12,19 +12,30 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import app.flipday.R
-import app.flipday.ui.events.AddEventScreen
+import app.flipday.ui.events.DetailScreen
+import app.flipday.ui.events.EditorScreen
 import app.flipday.ui.events.EventsScreen
 import app.flipday.ui.settings.AboutScreen
 import app.flipday.ui.settings.DeveloperScreen
@@ -33,7 +44,7 @@ import app.flipday.ui.settings.WidgetsScreen
 
 object Routes {
     const val EVENTS = "events"; const val WIDGETS = "widgets"; const val SETTINGS = "settings"
-    const val ADD = "add"; const val ABOUT = "about"; const val DEVELOPER = "developer"
+    const val ADD = "add"; const val EDIT = "edit/{id}"; const val DETAIL = "detail/{id}"; const val ABOUT = "about"; const val DEVELOPER = "developer"
 }
 
 private data class Tab(val route: String, val label: Int, val icon: ImageVector)
@@ -54,8 +65,20 @@ fun FlipdayRoot(factory: ViewModelProvider.Factory) {
     val entry by nav.currentBackStackEntryAsState()
     val route = entry?.destination?.route
     val onTab = tabs.any { it.route == route }
+    val eventsVm: EventsViewModel = viewModel(factory = factory)
+    val undo by eventsVm.undo.collectAsState()
+    val snackbar = remember { SnackbarHostState() }
+    val deletedText = stringResource(R.string.deleted_snack)
+    val undoText = stringResource(R.string.undo)
+    LaunchedEffect(undo) {
+        if (undo != null) {
+            val result = snackbar.showSnackbar(deletedText, actionLabel = undoText, duration = SnackbarDuration.Long, withDismissAction = false)
+            if (result == SnackbarResult.ActionPerformed) eventsVm.restoreDeleted() else eventsVm.dismissUndo()
+        }
+    }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbar) },
         floatingActionButton = {
             if (route == Routes.EVENTS) {
                 FloatingActionButton(onClick = { nav.navigate(Routes.ADD) }) {
@@ -82,10 +105,17 @@ fun FlipdayRoot(factory: ViewModelProvider.Factory) {
         },
     ) { padding ->
         NavHost(nav, startDestination = Routes.EVENTS, modifier = Modifier.padding(padding)) {
-            composable(Routes.EVENTS) { EventsScreen(factory) }
+            composable(Routes.EVENTS) { EventsScreen(factory, onOpen = { nav.navigate("detail/$it") }) }
             composable(Routes.WIDGETS) { WidgetsScreen() }
             composable(Routes.SETTINGS) { SettingsScreen(factory, onAbout = { nav.navigate(Routes.ABOUT) }) }
-            composable(Routes.ADD) { AddEventScreen(factory, onClose = { nav.popBackStack() }) }
+            composable(Routes.ADD) { EditorScreen(factory, eventId = null, onClose = { nav.popBackStack() }) }
+            composable(Routes.EDIT, arguments = listOf(navArgument("id") { type = NavType.LongType })) {
+                EditorScreen(factory, eventId = it.arguments?.getLong("id"), onClose = { nav.popBackStack() })
+            }
+            composable(Routes.DETAIL, arguments = listOf(navArgument("id") { type = NavType.LongType })) {
+                val id = it.arguments?.getLong("id") ?: 0L
+                DetailScreen(factory, id, onBack = { nav.popBackStack() }, onEdit = { e -> nav.navigate("edit/$e") })
+            }
             composable(Routes.ABOUT) { AboutScreen(onBack = { nav.popBackStack() }, onDeveloper = { nav.navigate(Routes.DEVELOPER) }) }
             composable(Routes.DEVELOPER) { DeveloperScreen(onBack = { nav.popBackStack() }) }
         }

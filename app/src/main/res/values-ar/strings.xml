@@ -109,4 +109,34 @@
         <item quantity="many">%1$s، %2$d يومًا متبقيًا</item>
         <item quantity="other">%1$s، %2$d يوم متبقٍ</item>
     </plurals>
+    <string name="new_event">حدث جديد</string>
+    <string name="edit_event">تعديل الحدث</string>
+    <string name="field_time">الوقت</string>
+    <string name="time_none">بدون وقت</string>
+    <string name="time_set">تحديد الوقت</string>
+    <string name="remind_title">ذكّرني</string>
+    <string name="remind_on_day">في يوم الحدث</string>
+    <string name="repeat_yearly">كرّر كل عام</string>
+    <string name="action_edit">تعديل</string>
+    <string name="action_delete">حذف</string>
+    <string name="delete_title">حذف هذا الحدث؟</string>
+    <string name="delete_body">سيُحذف «%1$s» مع ودجاته. يمكنك التراجع مباشرة بعد ذلك.</string>
+    <string name="deleted_snack">تم حذف الحدث</string>
+    <string name="undo">تراجع</string>
+    <string name="state_done">انتهى</string>
+    <string name="detail_next_birthday">عيد الميلاد القادم: %1$s</string>
+    <string name="detail_turns">يبلغ %1$s</string>
+    <string name="detail_started">بدأ في %1$s</string>
+    <string name="repeat_title">هل تعدّ للعام القادم؟</string>
+    <string name="repeat_body">سيبدأ العدّ التنازلي لـ «%1$s» حتى %2$s.</string>
+    <string name="repeat_no">لا، أبقِه كما هو</string>
+    <string name="repeat_yes">نعم، كرّر</string>
+    <plurals name="remind_days_before">
+        <item quantity="zero">قبل %1$s يوم</item>
+        <item quantity="one">قبل يوم</item>
+        <item quantity="two">قبل يومين</item>
+        <item quantity="few">قبل %1$s أيام</item>
+        <item quantity="many">قبل %1$s يومًا</item>
+        <item quantity="other">قبل %1$s يوم</item>
+    </plurals>
 </resources>

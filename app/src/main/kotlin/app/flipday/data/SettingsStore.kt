@@ -20,6 +20,7 @@ data class AppSettings(
     val notificationsEnabled: Boolean = true,
     val archiveAfterDays: Int = ArchivePolicy.DEFAULT_AFTER_DAYS,
     val defaultReminderDaysBefore: Int = 7,
+    val notificationsAsked: Boolean = false,
 )
 
 private val Context.dataStore by preferencesDataStore(name = "settings")
@@ -31,6 +32,7 @@ class SettingsStore(private val context: Context) {
         val notifications = booleanPreferencesKey("notifications")
         val archiveAfter = intPreferencesKey("archive_after_days")
         val defaultReminder = intPreferencesKey("default_reminder_days")
+        val asked = booleanPreferencesKey("notifications_asked")
     }
 
     val settings: Flow<AppSettings> = context.dataStore.data.map { p ->
@@ -40,12 +42,14 @@ class SettingsStore(private val context: Context) {
             notificationsEnabled = p[K.notifications] ?: true,
             archiveAfterDays = p[K.archiveAfter] ?: ArchivePolicy.DEFAULT_AFTER_DAYS,
             defaultReminderDaysBefore = p[K.defaultReminder] ?: 7,
+            notificationsAsked = p[K.asked] ?: false,
         )
     }
 
     suspend fun setNumerals(m: NumeralMode) = edit { it[K.numerals] = m.name }
     suspend fun setTheme(m: ThemeMode) = edit { it[K.theme] = m.name }
     suspend fun setNotifications(on: Boolean) = edit { it[K.notifications] = on }
+    suspend fun markNotificationsAsked() = edit { it[K.asked] = true }
     suspend fun setDefaultReminder(daysBefore: Int) = edit { it[K.defaultReminder] = daysBefore }
     suspend fun setArchiveAfter(days: Int) = edit { it[K.archiveAfter] = days }
 

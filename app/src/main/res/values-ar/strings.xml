@@ -159,7 +159,6 @@
     <string name="apply">تطبيق</string>
     <string name="filter_past">منتهية</string>
     <string name="archive_empty_title">لا أحداث مؤرشفة بعد</string>
-    <string name="archive_empty_body">تنتقل الأحداث المنتهية إلى هنا بعد ٧ أيام، ويمكنك استعادتها في أي وقت.</string>
     <string name="archive_change_time">تغيير مدة الأرشفة</string>
     <string name="archived_on">أُرشف في %1$s</string>
     <string name="restore">استعادة</string>
@@ -173,5 +172,18 @@
         <item quantity="few">بعد %1$s أيام</item>
         <item quantity="many">بعد %1$s يومًا</item>
         <item quantity="other">بعد %1$s يوم</item>
+    </plurals>
+    <string name="rationale_title">تذكيرات في وقتها</string>
+    <string name="rationale_body">اسمح بالإشعارات لنذكّرك قبل «%1$s».</string>
+    <string name="not_now">ليس الآن</string>
+    <string name="continue_label">متابعة</string>
+    <string name="archive_empty_body_never">الأرشفة التلقائية متوقفة. تظهر هنا الأحداث التي تؤرشفها بنفسك.</string>
+    <plurals name="archive_empty_body">
+        <item quantity="zero">تنتقل الأحداث المنتهية إلى هنا بعد %1$s يوم، ويمكنك استعادتها في أي وقت.</item>
+        <item quantity="one">تنتقل الأحداث المنتهية إلى هنا بعد يوم، ويمكنك استعادتها في أي وقت.</item>
+        <item quantity="two">تنتقل الأحداث المنتهية إلى هنا بعد يومين، ويمكنك استعادتها في أي وقت.</item>
+        <item quantity="few">تنتقل الأحداث المنتهية إلى هنا بعد %1$s أيام، ويمكنك استعادتها في أي وقت.</item>
+        <item quantity="many">تنتقل الأحداث المنتهية إلى هنا بعد %1$s يومًا، ويمكنك استعادتها في أي وقت.</item>
+        <item quantity="other">تنتقل الأحداث المنتهية إلى هنا بعد %1$s يوم، ويمكنك استعادتها في أي وقت.</item>
     </plurals>
 </resources>

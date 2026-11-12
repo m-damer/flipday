@@ -107,6 +107,7 @@ class SettingsViewModel(private val c: AppContainer) : ViewModel() {
     fun setNumerals(m: NumeralMode) { viewModelScope.launch { c.settings.setNumerals(m) } }
     fun setTheme(m: ThemeMode) { viewModelScope.launch { c.settings.setTheme(m) } }
     fun setNotifications(on: Boolean) { viewModelScope.launch { c.settings.setNotifications(on) } }
+    fun markNotificationsAsked() { viewModelScope.launch { c.settings.markNotificationsAsked() } }
     fun setDefaultReminder(days: Int) { viewModelScope.launch { c.settings.setDefaultReminder(days) } }
     fun setArchiveAfter(days: Int) { viewModelScope.launch { c.settings.setArchiveAfter(days) } }
 }

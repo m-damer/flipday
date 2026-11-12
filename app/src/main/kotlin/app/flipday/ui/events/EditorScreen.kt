@@ -1,5 +1,11 @@
 package app.flipday.ui.events
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -82,6 +88,11 @@ fun EditorScreen(factory: ViewModelProvider.Factory, eventId: Long?, onClose: ()
     var repeatYearly by remember { mutableStateOf(false) }
     var pickingDate by remember { mutableStateOf(false) }
     var pickingTime by remember { mutableStateOf(false) }
+    var pendingEvent by remember { mutableStateOf<Event?>(null) }
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val permission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { _ ->
+        pendingEvent?.let { vm.save(it, onClose) }
+    }
 
     LaunchedEffect(eventId) {
         if (eventId != null) vm.load(eventId)?.let { e ->
@@ -110,7 +121,9 @@ fun EditorScreen(factory: ViewModelProvider.Factory, eventId: Long?, onClose: ()
             reminders = rules,
             repeatYearly = type == EventType.COUNTDOWN && repeatYearly,
         )
-        vm.save(event, onClose)
+        val needsRationale = event.reminders.isNotEmpty() && Build.VERSION.SDK_INT >= 33 && !settings.notificationsAsked &&
+            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+        if (needsRationale) pendingEvent = event else vm.save(event, onClose)
     }
 
     Scaffold(topBar = {
@@ -167,6 +180,16 @@ fun EditorScreen(factory: ViewModelProvider.Factory, eventId: Long?, onClose: ()
                 }
             }
         }
+    }
+
+    pendingEvent?.let { ev ->
+        AlertDialog(
+            onDismissRequest = {},
+            title = { Text(stringResource(R.string.rationale_title)) },
+            text = { Text(stringResource(R.string.rationale_body, ev.title)) },
+            confirmButton = { TextButton(onClick = { settingsVm.markNotificationsAsked(); permission.launch(Manifest.permission.POST_NOTIFICATIONS) }) { Text(stringResource(R.string.continue_label)) } },
+            dismissButton = { TextButton(onClick = { settingsVm.markNotificationsAsked(); pendingEvent = null; vm.save(ev, onClose) }) { Text(stringResource(R.string.not_now)) } },
+        )
     }
 
     if (pickingDate) {

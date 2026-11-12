@@ -27,12 +27,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import app.flipday.R
 import app.flipday.core.EventType
+import app.flipday.core.NumeralFormatter
 import app.flipday.ui.ArchiveViewModel
 import app.flipday.ui.SettingsViewModel
 import java.time.LocalDate
@@ -65,7 +67,7 @@ fun ArchiveScreen(factory: ViewModelProvider.Factory, onBack: () -> Unit, onOpen
                 list == null -> Unit
                 list.isEmpty() -> Column(Modifier.fillMaxSize().padding(32.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(stringResource(R.string.archive_empty_title), style = MaterialTheme.typography.titleLarge)
-                    Text(stringResource(R.string.archive_empty_body), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(vertical = 8.dp))
+                    Text(if (settings.archiveAfterDays < 0) stringResource(R.string.archive_empty_body_never) else pluralStringResource(R.plurals.archive_empty_body, settings.archiveAfterDays, NumeralFormatter.format(settings.archiveAfterDays.toString(), settings.numerals, tag)), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(vertical = 8.dp))
                     OutlinedButton(onClick = onChangeArchiveTime) { Text(stringResource(R.string.archive_change_time)) }
                 }
                 else -> LazyColumn(contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {

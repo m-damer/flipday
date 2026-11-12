@@ -46,7 +46,6 @@
     <string name="set_language">Language</string>
     <string name="set_numerals">Numerals</string>
     <string name="set_theme">Theme</string>
-    <string name="set_week_start">Week starts on</string>
     <string name="set_backup">Backup and restore</string>
     <string name="set_about_app">About Flipday</string>
     <string name="value_automatic">Automatic</string>
@@ -254,4 +253,19 @@
     </plurals>
     <string name="backup_bad_file">This file is not a Flipday backup.</string>
     <string name="backup_newer_file">This backup was made by a newer version of Flipday. Update the app to import it.</string>
+    <string name="remind_time">Reminder time</string>
+    <string name="exact_title">Allow exact reminders?</string>
+    <string name="exact_body">To remind you at exactly %1$s, Android needs your permission. Without it, reminders can arrive a few minutes late.</string>
+    <string name="exact_keep">Keep approximate</string>
+    <string name="exact_open">Open settings</string>
+    <string name="widget_refresh_title">Widget refresh</string>
+    <string name="widget_refresh_body">Widgets update at midnight and whenever the date, time or time zone changes. The live ticker style also updates about every 15 minutes. Nothing runs in the background otherwise.</string>
+    <string name="ok_got_it">Got it</string>
+    <string name="privacy_title">Privacy policy</string>
+    <string name="privacy_body">Flipday keeps everything on your phone.\n\nWhat it stores: the events you create (titles, dates, reminder settings) and your app settings. They live in the app\u2019s private storage.\n\nWhat it does not do: it has no account, no ads, no analytics, no tracking and no network connection. Nothing is sent to the developer or to anyone else.\n\nNotifications: reminders are scheduled on your phone with Android\u2019s alarm service. You can turn them off in Android settings at any time.\n\nBackups: if Android device backup is on, Android may back up your events and settings to your own Google account. That is controlled by Android, not by Flipday. Export to file creates a file only where you choose to save it.\n\nDeleting: delete an event in the app, or uninstall the app to remove all data.\n\nQuestions: use Send feedback in About.</string>
+    <string name="licenses_title">Open-source licenses</string>
+    <string name="licenses_intro">Flipday is built with these open-source components.</string>
+    <string name="licenses_apache">Apache License 2.0</string>
+    <string name="licenses_ofl">SIL Open Font License 1.1</string>
+    <string name="rate_failed">Could not open the store.</string>
 </resources>

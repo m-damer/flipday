@@ -67,7 +67,7 @@ private fun ChildScaffold(title: String, onBack: () -> Unit, content: @Composabl
 }
 
 @Composable
-fun AboutScreen(onBack: () -> Unit, onDeveloper: () -> Unit) {
+fun AboutScreen(onBack: () -> Unit, onDeveloper: () -> Unit, onPrivacy: () -> Unit, onLicenses: () -> Unit) {
     val context = LocalContext.current
     val version = remember(context) { runCatching { context.packageManager.getPackageInfo(context.packageName, 0).versionName }.getOrNull().orEmpty() }
     ChildScaffold(stringResource(R.string.about_title), onBack) {
@@ -81,10 +81,10 @@ fun AboutScreen(onBack: () -> Unit, onDeveloper: () -> Unit) {
             androidx.compose.material3.Surface(shape = MaterialTheme.shapes.large, color = MaterialTheme.colorScheme.surface) {
                 Column {
                     ValueRow(stringResource(R.string.about_developer), "", onClick = onDeveloper)
-                    ValueRow(stringResource(R.string.about_privacy), stringResource(R.string.coming_soon), enabled = false)
-                    ValueRow(stringResource(R.string.about_licenses), stringResource(R.string.coming_soon), enabled = false)
+                    ValueRow(stringResource(R.string.about_privacy), "", onClick = onPrivacy)
+                    ValueRow(stringResource(R.string.about_licenses), "", onClick = onLicenses)
                     ValueRow(stringResource(R.string.about_feedback), "", onClick = { openEmail(context) })
-                    ValueRow(stringResource(R.string.about_rate), stringResource(R.string.coming_soon), enabled = false, last = true)
+                    ValueRow(stringResource(R.string.about_rate), "", last = true, onClick = { rateApp(context) })
                 }
             }
         }
@@ -155,6 +155,51 @@ fun WidgetsScreen(factory: ViewModelProvider.Factory) {
             }
         }
         if (unsupported) Text(stringResource(R.string.widgets_pin_unsupported), color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium)
+    }
+}
+
+private fun rateApp(context: Context) {
+    val market = Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + context.packageName))
+    val web = Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + context.packageName))
+    if (!runCatching { context.startActivity(market) }.isSuccess && !runCatching { context.startActivity(web) }.isSuccess) {
+        android.widget.Toast.makeText(context, R.string.rate_failed, android.widget.Toast.LENGTH_SHORT).show()
+    }
+}
+
+@Composable
+fun PrivacyScreen(onBack: () -> Unit) {
+    ChildScaffold(stringResource(R.string.privacy_title), onBack) {
+        Text(
+            stringResource(R.string.privacy_body), style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp),
+        )
+    }
+}
+
+private val Components = listOf(
+    "Kotlin and Kotlin Coroutines" to R.string.licenses_apache,
+    "AndroidX Core, AppCompat, Activity, Lifecycle" to R.string.licenses_apache,
+    "Jetpack Compose and Material 3" to R.string.licenses_apache,
+    "Jetpack Navigation" to R.string.licenses_apache,
+    "Room" to R.string.licenses_apache,
+    "DataStore" to R.string.licenses_apache,
+    "Jetpack Glance" to R.string.licenses_apache,
+    "IBM Plex Sans, IBM Plex Sans Arabic" to R.string.licenses_ofl,
+    "Space Grotesk" to R.string.licenses_ofl,
+)
+
+@Composable
+fun LicensesScreen(onBack: () -> Unit) {
+    ChildScaffold(stringResource(R.string.licenses_title), onBack) {
+        Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+            Text(stringResource(R.string.licenses_intro), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Components.forEach { (name, license) ->
+                Column {
+                    Text(name, style = MaterialTheme.typography.titleSmall)
+                    Text(stringResource(license), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
+        }
     }
 }
 

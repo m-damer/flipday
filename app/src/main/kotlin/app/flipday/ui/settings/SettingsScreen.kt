@@ -70,13 +70,12 @@ fun SettingsScreen(factory: ViewModelProvider.Factory, onAbout: () -> Unit, onBa
         }
         Section(R.string.settings_events_widgets) {
             ValueRow(stringResource(R.string.set_archive_finished), archiveLabel(s.archiveAfterDays, s.numerals, lang)) { dialog = "archive" }
-            ValueRow(stringResource(R.string.set_widget_refresh), stringResource(R.string.value_automatic), enabled = false, last = true)
+            ValueRow(stringResource(R.string.set_widget_refresh), stringResource(R.string.value_automatic), last = true) { dialog = "widgetrefresh" }
         }
         Section(R.string.settings_language_display) {
             ValueRow(stringResource(R.string.set_language), if (lang == "ar") stringResource(R.string.value_arabic) else stringResource(R.string.value_english)) { dialog = "language" }
             ValueRow(stringResource(R.string.set_numerals), numeralLabel(s.numerals)) { dialog = "numerals" }
-            ValueRow(stringResource(R.string.set_theme), themeLabel(s.theme)) { dialog = "theme" }
-            ValueRow(stringResource(R.string.set_week_start), stringResource(R.string.coming_soon), enabled = false, last = true)
+            ValueRow(stringResource(R.string.set_theme), themeLabel(s.theme), last = true) { dialog = "theme" }
         }
         Section(R.string.settings_data) {
             ValueRow(stringResource(R.string.set_backup), "", last = true, onClick = onBackup)
@@ -87,6 +86,12 @@ fun SettingsScreen(factory: ViewModelProvider.Factory, onAbout: () -> Unit, onBa
     }
 
     when (dialog) {
+        "widgetrefresh" -> AlertDialog(
+            onDismissRequest = { dialog = null },
+            title = { Text(stringResource(R.string.widget_refresh_title)) },
+            text = { Text(stringResource(R.string.widget_refresh_body)) },
+            confirmButton = { TextButton(onClick = { dialog = null }) { Text(stringResource(R.string.ok_got_it)) } },
+        )
         "reminder" -> ChoiceDialog(
             title = R.string.set_default_reminder,
             options = listOf(-1, 0, 1, 3, 7).map { reminderLabel(it, s.numerals, lang) to it.toString() },

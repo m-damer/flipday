@@ -1,7 +1,10 @@
 package app.flipday.ui.events
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
+import android.provider.Settings
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -57,6 +60,7 @@ import app.flipday.core.Event
 import app.flipday.core.EventType
 import app.flipday.core.NumeralFormatter
 import app.flipday.core.ReminderRule
+import app.flipday.reminders.ReminderScheduler
 import app.flipday.ui.EditorViewModel
 import app.flipday.ui.SettingsViewModel
 import java.time.Instant
@@ -94,7 +98,11 @@ fun EditorScreen(factory: ViewModelProvider.Factory, eventId: Long?, onClose: ()
     var pickingDate by remember { mutableStateOf(0) }
     var pickingTime by remember { mutableStateOf(false) }
     var pendingEvent by remember { mutableStateOf<Event?>(null) }
+    var reminderTime by remember { mutableStateOf(ReminderScheduler.DEFAULT_TIME) }
+    var pickingReminderTime by remember { mutableStateOf(false) }
+    var exactEvent by remember { mutableStateOf<Event?>(null) }
     val context = androidx.compose.ui.platform.LocalContext.current
+    val scheduler = remember { ReminderScheduler(context.applicationContext) }
     val permission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { _ ->
         pendingEvent?.let { vm.save(it, onClose) }
     }
@@ -103,6 +111,7 @@ fun EditorScreen(factory: ViewModelProvider.Factory, eventId: Long?, onClose: ()
         if (eventId != null) vm.load(eventId)?.let { e ->
             original = e; type = e.type; title = e.title; date = e.date; endDate = e.endDate ?: e.date.plusDays(7); time = e.time
             reminderDays = e.reminders.map { it.daysBefore }.toSet(); repeatYearly = e.repeatYearly
+            e.reminders.firstOrNull()?.let { reminderTime = it.at }
         }
     }
     // New events start with the default reminder from Settings (negative means off).
@@ -119,7 +128,7 @@ fun EditorScreen(factory: ViewModelProvider.Factory, eventId: Long?, onClose: ()
         if (pastCountdown || endBeforeStart) return
         val base = original
         val rules = if (hasReminders) selectedReminders.sorted().map { d ->
-            ReminderRule(d, base?.reminders?.firstOrNull { it.daysBefore == d }?.at ?: LocalTime.of(9, 0))
+            ReminderRule(d, reminderTime)
         } else emptyList()
         val event = (base ?: Event(title = title.trim(), type = type, date = date, endDate = if (type == EventType.PERIOD) endDate else null)).copy(
             title = title.trim(), type = type, date = date,
@@ -131,7 +140,12 @@ fun EditorScreen(factory: ViewModelProvider.Factory, eventId: Long?, onClose: ()
         )
         val needsRationale = event.reminders.isNotEmpty() && Build.VERSION.SDK_INT >= 33 && !settings.notificationsAsked &&
             ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
-        if (needsRationale) pendingEvent = event else vm.save(event, onClose)
+        val needsExact = event.reminders.isNotEmpty() && reminderTime != ReminderScheduler.DEFAULT_TIME && !scheduler.canScheduleExact()
+        when {
+            needsRationale -> pendingEvent = event
+            needsExact -> exactEvent = event
+            else -> vm.save(event, onClose)
+        }
     }
 
     Scaffold(topBar = {
@@ -193,6 +207,11 @@ fun EditorScreen(factory: ViewModelProvider.Factory, eventId: Long?, onClose: ()
                     }
                 }
             }
+            if (hasReminders && selectedReminders.isNotEmpty()) {
+                OutlinedButton(onClick = { pickingReminderTime = true }, modifier = Modifier.fillMaxWidth()) {
+                    Text(stringResource(R.string.remind_time) + ": " + NumeralFormatter.format(reminderTime.format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(locale)), settings.numerals, tag))
+                }
+            }
             if (type == EventType.COUNTDOWN) {
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                     Text(stringResource(R.string.repeat_yearly), Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge)
@@ -209,6 +228,34 @@ fun EditorScreen(factory: ViewModelProvider.Factory, eventId: Long?, onClose: ()
             text = { Text(stringResource(R.string.rationale_body, ev.title)) },
             confirmButton = { TextButton(onClick = { settingsVm.markNotificationsAsked(); permission.launch(Manifest.permission.POST_NOTIFICATIONS) }) { Text(stringResource(R.string.continue_label)) } },
             dismissButton = { TextButton(onClick = { settingsVm.markNotificationsAsked(); pendingEvent = null; vm.save(ev, onClose) }) { Text(stringResource(R.string.not_now)) } },
+        )
+    }
+
+    exactEvent?.let { ev ->
+        val shown = NumeralFormatter.format(reminderTime.format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(locale)), settings.numerals, tag)
+        AlertDialog(
+            onDismissRequest = { exactEvent = null },
+            title = { Text(stringResource(R.string.exact_title)) },
+            text = { Text(stringResource(R.string.exact_body, shown)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    exactEvent = null
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) context.startActivity(Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM, Uri.parse("package:" + context.packageName)))
+                    vm.save(ev, onClose)
+                }) { Text(stringResource(R.string.exact_open)) }
+            },
+            dismissButton = { TextButton(onClick = { exactEvent = null; vm.save(ev, onClose) }) { Text(stringResource(R.string.exact_keep)) } },
+        )
+    }
+
+    if (pickingReminderTime) {
+        val state = rememberTimePickerState(initialHour = reminderTime.hour, initialMinute = reminderTime.minute, is24Hour = android.text.format.DateFormat.is24HourFormat(context))
+        AlertDialog(
+            onDismissRequest = { pickingReminderTime = false },
+            title = { Text(stringResource(R.string.remind_time)) },
+            text = { TimePicker(state = state) },
+            confirmButton = { TextButton(onClick = { reminderTime = LocalTime.of(state.hour, state.minute); pickingReminderTime = false }) { Text(stringResource(R.string.ok)) } },
+            dismissButton = { TextButton(onClick = { pickingReminderTime = false }) { Text(stringResource(R.string.cancel)) } },
         )
     }
 

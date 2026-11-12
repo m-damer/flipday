@@ -46,7 +46,6 @@
     <string name="set_language">اللغة</string>
     <string name="set_numerals">الأرقام</string>
     <string name="set_theme">المظهر</string>
-    <string name="set_week_start">بداية الأسبوع</string>
     <string name="set_backup">النسخ الاحتياطي والاستعادة</string>
     <string name="set_about_app">حول فليب داي</string>
     <string name="value_automatic">تلقائي</string>
@@ -306,4 +305,19 @@
     </plurals>
     <string name="backup_bad_file">هذا الملف ليس نسخة احتياطية من فليب داي.</string>
     <string name="backup_newer_file">أُنشئت هذه النسخة بإصدار أحدث من فليب داي. حدّث التطبيق لاستيرادها.</string>
+    <string name="remind_time">وقت التذكير</string>
+    <string name="exact_title">السماح بالتذكير في الوقت الدقيق؟</string>
+    <string name="exact_body">لتذكيرك في تمام الساعة %1$s، يحتاج أندرويد إلى إذنك. بدونه قد تصل التذكيرات متأخرة بضع دقائق.</string>
+    <string name="exact_keep">إبقاء الوقت تقريبيًا</string>
+    <string name="exact_open">فتح الإعدادات</string>
+    <string name="widget_refresh_title">تحديث الودجات</string>
+    <string name="widget_refresh_body">تتحدّث الودجات عند منتصف الليل وكلما تغيّر التاريخ أو الوقت أو المنطقة الزمنية. ويتحدّث نمط العدّاد الحيّ أيضًا كل ١٥ دقيقة تقريبًا. لا يعمل شيء آخر في الخلفية.</string>
+    <string name="ok_got_it">حسنًا</string>
+    <string name="privacy_title">سياسة الخصوصية</string>
+    <string name="privacy_body">يحتفظ فليب داي بكل شيء على هاتفك.\n\nما يخزّنه: الأحداث التي تنشئها (العناوين والتواريخ وإعدادات التذكير) وإعدادات التطبيق. تُحفظ في مساحة التطبيق الخاصة.\n\nما لا يفعله: لا حساب، ولا إعلانات، ولا تحليلات، ولا تتبّع، ولا اتصال بالإنترنت. لا يُرسَل أي شيء إلى المطوّر أو إلى أي جهة أخرى.\n\nالإشعارات: تُجدول التذكيرات على هاتفك بخدمة المنبّهات في أندرويد. يمكنك إيقافها من إعدادات أندرويد في أي وقت.\n\nالنسخ الاحتياطي: إذا كان نسخ الجهاز الاحتياطي في أندرويد مفعّلًا، فقد ينسخ أندرويد أحداثك وإعداداتك إلى حسابك في جوجل. هذا يتحكّم به أندرويد وليس فليب داي. أما التصدير إلى ملف فيُنشئ ملفًا في المكان الذي تختاره فقط.\n\nالحذف: احذف الحدث من التطبيق، أو احذف التطبيق لإزالة كل البيانات.\n\nأسئلة: استخدم «إرسال ملاحظات» في صفحة «حول».</string>
+    <string name="licenses_title">تراخيص المصادر المفتوحة</string>
+    <string name="licenses_intro">بُني فليب داي بالمكوّنات المفتوحة المصدر التالية.</string>
+    <string name="licenses_apache">رخصة أباتشي 2.0</string>
+    <string name="licenses_ofl">رخصة الخطوط المفتوحة SIL 1.1</string>
+    <string name="rate_failed">تعذّر فتح المتجر.</string>
 </resources>

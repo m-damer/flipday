@@ -4,6 +4,8 @@
 
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <!-- Only for the opt-in "reminder time" feature. USE_EXACT_ALARM is deliberately not declared. -->
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <!-- SCHEDULE_EXACT_ALARM is intentionally NOT declared in this phase. Add it only with the "set time" reminders feature.
          Never declare USE_EXACT_ALARM: Play policy reserves it for alarm and calendar apps. -->
 

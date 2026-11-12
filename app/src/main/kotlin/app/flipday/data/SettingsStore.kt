@@ -46,6 +46,8 @@ class SettingsStore(private val context: Context) {
     suspend fun setNumerals(m: NumeralMode) = edit { it[K.numerals] = m.name }
     suspend fun setTheme(m: ThemeMode) = edit { it[K.theme] = m.name }
     suspend fun setNotifications(on: Boolean) = edit { it[K.notifications] = on }
+    suspend fun setDefaultReminder(daysBefore: Int) = edit { it[K.defaultReminder] = daysBefore }
+    suspend fun setArchiveAfter(days: Int) = edit { it[K.archiveAfter] = days }
 
     private suspend fun edit(block: (androidx.datastore.preferences.core.MutablePreferences) -> Unit) {
         context.dataStore.edit { block(it) }

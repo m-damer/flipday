@@ -31,12 +31,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.os.LocaleListCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import app.flipday.R
+import app.flipday.core.ArchivePolicy
+import app.flipday.core.NumeralFormatter
 import app.flipday.core.NumeralMode
 import app.flipday.data.ThemeMode
 import app.flipday.ui.SettingsViewModel
@@ -63,10 +66,10 @@ fun SettingsScreen(factory: ViewModelProvider.Factory, onAbout: () -> Unit) {
             ToggleRow(stringResource(R.string.set_notifications), s.notificationsEnabled) { on ->
                 if (on && Build.VERSION.SDK_INT >= 33) permission.launch(Manifest.permission.POST_NOTIFICATIONS) else vm.setNotifications(on)
             }
-            ValueRow(stringResource(R.string.set_default_reminder), stringResource(R.string.coming_soon), enabled = false, last = true)
+            ValueRow(stringResource(R.string.set_default_reminder), reminderLabel(s.defaultReminderDaysBefore, s.numerals, lang)) { dialog = "reminder" }
         }
         Section(R.string.settings_events_widgets) {
-            ValueRow(stringResource(R.string.set_archive_finished), stringResource(R.string.coming_soon), enabled = false)
+            ValueRow(stringResource(R.string.set_archive_finished), archiveLabel(s.archiveAfterDays, s.numerals, lang)) { dialog = "archive" }
             ValueRow(stringResource(R.string.set_widget_refresh), stringResource(R.string.value_automatic), enabled = false, last = true)
         }
         Section(R.string.settings_language_display) {
@@ -84,29 +87,53 @@ fun SettingsScreen(factory: ViewModelProvider.Factory, onAbout: () -> Unit) {
     }
 
     when (dialog) {
+        "reminder" -> ChoiceDialog(
+            title = R.string.set_default_reminder,
+            options = listOf(-1, 0, 1, 3, 7).map { reminderLabel(it, s.numerals, lang) to it.toString() },
+            selected = s.defaultReminderDaysBefore.toString(),
+            onPick = { vm.setDefaultReminder(it.toInt()); dialog = null },
+            onDismiss = { dialog = null },
+        )
+        "archive" -> ChoiceDialog(
+            title = R.string.set_archive_finished,
+            options = listOf(1, 7, 30, ArchivePolicy.NEVER).map { archiveLabel(it, s.numerals, lang) to it.toString() },
+            selected = s.archiveAfterDays.toString(),
+            onPick = { vm.setArchiveAfter(it.toInt()); dialog = null },
+            onDismiss = { dialog = null },
+        )
         "language" -> ChoiceDialog(
             title = R.string.dialog_language_title,
-            options = listOf(R.string.value_system to "", R.string.value_english to "en", R.string.value_arabic to "ar"),
+            options = listOf(stringResource(R.string.value_system) to "", stringResource(R.string.value_english) to "en", stringResource(R.string.value_arabic) to "ar"),
             selected = AppCompatDelegate.getApplicationLocales().toLanguageTags().substringBefore(','),
             onPick = { AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(it)); dialog = null },
             onDismiss = { dialog = null },
         )
         "numerals" -> ChoiceDialog(
             title = R.string.dialog_numerals_title,
-            options = listOf(R.string.value_match_language to NumeralMode.MATCH_LANGUAGE.name, R.string.value_western to NumeralMode.WESTERN.name, R.string.value_arabic_indic to NumeralMode.ARABIC_INDIC.name),
+            options = listOf(stringResource(R.string.value_match_language) to NumeralMode.MATCH_LANGUAGE.name, stringResource(R.string.value_western) to NumeralMode.WESTERN.name, stringResource(R.string.value_arabic_indic) to NumeralMode.ARABIC_INDIC.name),
             selected = s.numerals.name,
             onPick = { vm.setNumerals(NumeralMode.valueOf(it)); dialog = null },
             onDismiss = { dialog = null },
         )
         "theme" -> ChoiceDialog(
             title = R.string.dialog_theme_title,
-            options = listOf(R.string.value_system to ThemeMode.SYSTEM.name, R.string.value_light to ThemeMode.LIGHT.name, R.string.value_dark to ThemeMode.DARK.name),
+            options = listOf(stringResource(R.string.value_system) to ThemeMode.SYSTEM.name, stringResource(R.string.value_light) to ThemeMode.LIGHT.name, stringResource(R.string.value_dark) to ThemeMode.DARK.name),
             selected = s.theme.name,
             onPick = { vm.setTheme(ThemeMode.valueOf(it)); dialog = null },
             onDismiss = { dialog = null },
         )
     }
 }
+
+@Composable private fun reminderLabel(days: Int, numerals: NumeralMode, lang: String): String = when {
+    days < 0 -> stringResource(R.string.default_reminder_off)
+    days == 0 -> stringResource(R.string.remind_on_day)
+    else -> pluralStringResource(R.plurals.remind_days_before, days, NumeralFormatter.format(days.toString(), numerals, lang))
+}
+
+@Composable private fun archiveLabel(days: Int, numerals: NumeralMode, lang: String): String =
+    if (days < 0) stringResource(R.string.archive_never)
+    else pluralStringResource(R.plurals.archive_after_days, days, NumeralFormatter.format(days.toString(), numerals, lang))
 
 @Composable private fun numeralLabel(m: NumeralMode) = stringResource(
     when (m) { NumeralMode.MATCH_LANGUAGE -> R.string.value_match_language; NumeralMode.WESTERN -> R.string.value_western; NumeralMode.ARABIC_INDIC -> R.string.value_arabic_indic },
@@ -143,7 +170,7 @@ internal fun ValueRow(label: String, value: String, enabled: Boolean = true, las
 }
 
 @Composable
-private fun ChoiceDialog(title: Int, options: List<Pair<Int, String>>, selected: String, onPick: (String) -> Unit, onDismiss: () -> Unit) {
+private fun ChoiceDialog(title: Int, options: List<Pair<String, String>>, selected: String, onPick: (String) -> Unit, onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(title)) },
@@ -152,7 +179,7 @@ private fun ChoiceDialog(title: Int, options: List<Pair<Int, String>>, selected:
                 options.forEach { (label, key) ->
                     Row(Modifier.fillMaxWidth().heightIn(min = 48.dp).clickable { onPick(key) }, verticalAlignment = Alignment.CenterVertically) {
                         RadioButton(selected = selected == key, onClick = { onPick(key) })
-                        Text(stringResource(label), style = MaterialTheme.typography.bodyLarge)
+                        Text(label, style = MaterialTheme.typography.bodyLarge)
                     }
                 }
             }

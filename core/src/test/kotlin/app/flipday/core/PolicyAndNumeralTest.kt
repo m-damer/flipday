@@ -27,4 +27,10 @@ class PolicyAndNumeralTest {
     @Test fun westernWhenForced() = assertEquals("23", NumeralFormatter.format("23", NumeralMode.WESTERN, "ar"))
     @Test fun arabicIndicWhenForcedInEnglish() = assertEquals("٠:٤٥ AM", NumeralFormatter.format("0:45 AM", NumeralMode.ARABIC_INDIC, "en-US"))
     @Test fun matchLanguageKeepsEnglish() = assertEquals("2,557", NumeralFormatter.format("2,557", NumeralMode.MATCH_LANGUAGE, "en"))
+
+    @Test fun `never archive setting keeps finished countdowns`() {
+        val e = Event(title = "Old", type = EventType.COUNTDOWN, date = java.time.LocalDate.of(2020, 1, 1))
+        assertEquals(false, ArchivePolicy.shouldArchive(e, java.time.LocalDate.of(2026, 11, 12), ArchivePolicy.NEVER))
+        assertEquals(true, ArchivePolicy.shouldArchive(e, java.time.LocalDate.of(2026, 11, 12), 7))
+    }
 }

@@ -164,4 +164,14 @@
     <string name="archived_on">أُرشف في %1$s</string>
     <string name="restore">استعادة</string>
     <string name="delete_forever">حذف نهائيًا</string>
+    <string name="default_reminder_off">متوقف</string>
+    <string name="archive_never">أبدًا</string>
+    <plurals name="archive_after_days">
+        <item quantity="zero">بعد %1$s يوم</item>
+        <item quantity="one">بعد يوم</item>
+        <item quantity="two">بعد يومين</item>
+        <item quantity="few">بعد %1$s أيام</item>
+        <item quantity="many">بعد %1$s يومًا</item>
+        <item quantity="other">بعد %1$s يوم</item>
+    </plurals>
 </resources>

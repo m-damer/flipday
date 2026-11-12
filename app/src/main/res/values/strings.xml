@@ -148,4 +148,10 @@
     <string name="archived_on">Archived %1$s</string>
     <string name="restore">Restore</string>
     <string name="delete_forever">Delete forever</string>
+    <string name="default_reminder_off">Off</string>
+    <string name="archive_never">Never</string>
+    <plurals name="archive_after_days">
+        <item quantity="one">After %1$s day</item>
+        <item quantity="other">After %1$s days</item>
+    </plurals>
 </resources>

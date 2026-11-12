@@ -6,7 +6,11 @@ import java.time.LocalDate
 object ArchivePolicy {
     const val DEFAULT_AFTER_DAYS = 7
 
+    /** Setting value meaning "never archive automatically". */
+    const val NEVER = -1
+
     fun shouldArchive(event: Event, today: LocalDate, afterDays: Int = DEFAULT_AFTER_DAYS): Boolean {
+        if (afterDays < 0) return false
         if (event.type != EventType.COUNTDOWN || event.archivedOn != null || event.repeatYearly) return false
         return event.date.plusDays(afterDays.toLong()).isBefore(today)
     }

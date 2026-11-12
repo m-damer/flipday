@@ -47,7 +47,7 @@ class FlipdayWidget : GlanceAppWidget() {
 
         provideContent {
             Box(
-                modifier = GlanceModifier.fillMaxSize().background(Color(0xFFFFFFFF)).padding(12.dp).clickable(actionStartActivity<MainActivity>()),
+                modifier = GlanceModifier.fillMaxSize().background(Color(0xFFFFFFFF)).padding(12.dp).clickable(actionStartActivity(android.content.Intent(context, MainActivity::class.java))),
                 contentAlignment = Alignment.Center,
             ) {
                 if (next == null || digits == null) {

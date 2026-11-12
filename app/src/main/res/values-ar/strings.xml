@@ -186,4 +186,10 @@
         <item quantity="many">تنتقل الأحداث المنتهية إلى هنا بعد %1$s يومًا، ويمكنك استعادتها في أي وقت.</item>
         <item quantity="other">تنتقل الأحداث المنتهية إلى هنا بعد %1$s يوم، ويمكنك استعادتها في أي وقت.</item>
     </plurals>
+    <string name="widget_choose">اختر حدثًا</string>
+    <string name="widget_setup_title">اختر حدثًا</string>
+    <string name="widget_nearest">أقرب حدث قادم</string>
+    <string name="widget_style">النمط</string>
+    <string name="style_flap">فليب</string>
+    <string name="style_paper">ورقي</string>
 </resources>

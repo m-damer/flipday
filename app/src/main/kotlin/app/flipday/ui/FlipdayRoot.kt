@@ -62,8 +62,9 @@ private val tabs = listOf(
  * Child screens (add, about, developer) hide the bar and show Back or Close. FAB only on Events.
  */
 @Composable
-fun FlipdayRoot(factory: ViewModelProvider.Factory) {
+fun FlipdayRoot(factory: ViewModelProvider.Factory, openEventId: Long? = null, onOpened: () -> Unit = {}) {
     val nav = rememberNavController()
+    LaunchedEffect(openEventId) { openEventId?.let { nav.navigate("detail/$it"); onOpened() } }
     val entry by nav.currentBackStackEntryAsState()
     val route = entry?.destination?.route
     val onTab = tabs.any { it.route == route }

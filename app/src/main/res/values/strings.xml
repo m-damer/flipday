@@ -162,4 +162,10 @@
         <item quantity="one">Finished events move here after %1$s day. You can restore them any time.</item>
         <item quantity="other">Finished events move here after %1$s days. You can restore them any time.</item>
     </plurals>
+    <string name="widget_choose">Choose event</string>
+    <string name="widget_setup_title">Choose event</string>
+    <string name="widget_nearest">Nearest upcoming event</string>
+    <string name="widget_style">STYLE</string>
+    <string name="style_flap">Flap</string>
+    <string name="style_paper">Paper</string>
 </resources>

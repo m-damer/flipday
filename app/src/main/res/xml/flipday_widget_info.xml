@@ -10,5 +10,7 @@
     android:resizeMode="horizontal|vertical"
     android:updatePeriodMillis="0"
     android:widgetCategory="home_screen"
+    android:configure="app.flipday.widget.WidgetConfigActivity"
+    android:widgetFeatures="reconfigurable"
     android:initialLayout="@layout/glance_default_loading_layout"
     android:description="@string/widget_desc" />

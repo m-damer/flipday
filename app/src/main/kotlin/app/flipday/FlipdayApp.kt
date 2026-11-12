@@ -5,7 +5,10 @@ import app.flipday.core.Event
 import app.flipday.data.EventRepository
 import app.flipday.data.FlipdayDatabase
 import app.flipday.data.SettingsStore
+import androidx.glance.appwidget.updateAll
 import app.flipday.reminders.ReminderScheduler
+import app.flipday.widget.FlipdayWidget
+import app.flipday.widget.WidgetRefresher
 import kotlinx.coroutines.flow.MutableStateFlow
 
 /** Manual dependency container. Small enough that a DI framework would add more than it removes. */
@@ -13,7 +16,7 @@ class AppContainer(app: Application) {
     private val db = FlipdayDatabase.build(app)
     val settings = SettingsStore(app)
     val scheduler = ReminderScheduler(app)
-    val repository = EventRepository(db.eventDao(), scheduler)
+    val repository = EventRepository(db.eventDao(), scheduler) { FlipdayWidget().updateAll(app) }
 
     /** Last deleted event, kept so the Events screen can offer Undo after a delete from the detail screen. */
     val pendingUndo = MutableStateFlow<Event?>(null)
@@ -27,5 +30,6 @@ class FlipdayApp : Application() {
         super.onCreate()
         container = AppContainer(this)
         container.scheduler.ensureChannel()
+        WidgetRefresher.scheduleNext(this)
     }
 }

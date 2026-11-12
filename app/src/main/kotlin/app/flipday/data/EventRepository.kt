@@ -7,7 +7,12 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.time.LocalDate
 
-class EventRepository(private val dao: EventDao, private val scheduler: ReminderScheduler) {
+class EventRepository(
+    private val dao: EventDao,
+    private val scheduler: ReminderScheduler,
+    /** Called after every change so widgets can refresh. */
+    private val onChanged: suspend () -> Unit = {},
+) {
     fun observeEvents(): Flow<List<Event>> = dao.observeAll().map { list -> list.map { it.toDomain() } }
 
     fun observe(id: Long): Flow<Event?> = observeEvents().map { list -> list.firstOrNull { it.id == id } }
@@ -19,6 +24,7 @@ class EventRepository(private val dao: EventDao, private val scheduler: Reminder
     suspend fun save(event: Event): Long {
         val id = dao.upsert(event.toEntity())
         if (event.archivedOn == null) scheduler.schedule(event.copy(id = id)) else scheduler.cancel(id)
+        onChanged()
         return id
     }
 
@@ -37,6 +43,7 @@ class EventRepository(private val dao: EventDao, private val scheduler: Reminder
     suspend fun delete(event: Event) {
         scheduler.cancel(event.id)
         dao.delete(event.toEntity())
+        onChanged()
     }
 
     /** Called after boot, time change or app update, when alarms are lost. */

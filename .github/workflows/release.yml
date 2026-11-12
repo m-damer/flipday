@@ -1,0 +1,29 @@
+name: Release bundle
+
+# Manual run only. Needs four repository secrets (Settings > Secrets and variables > Actions):
+#   FLIPDAY_KEYSTORE_BASE64  the upload keystore, base64 encoded (base64 -w0 flipday-upload.jks)
+#   FLIPDAY_KEYSTORE_PASSWORD, FLIPDAY_KEY_ALIAS, FLIPDAY_KEY_PASSWORD
+on: workflow_dispatch
+
+jobs:
+  bundle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: 17 }
+      - uses: gradle/actions/setup-gradle@v4
+        with: { gradle-version: 8.14.3 }
+      - name: Decode keystore
+        run: echo "${{ secrets.FLIPDAY_KEYSTORE_BASE64 }}" | base64 -d > "$RUNNER_TEMP/upload.jks"
+      - name: Build signed bundle
+        env:
+          FLIPDAY_KEYSTORE_PATH: ${{ runner.temp }}/upload.jks
+          FLIPDAY_KEYSTORE_PASSWORD: ${{ secrets.FLIPDAY_KEYSTORE_PASSWORD }}
+          FLIPDAY_KEY_ALIAS: ${{ secrets.FLIPDAY_KEY_ALIAS }}
+          FLIPDAY_KEY_PASSWORD: ${{ secrets.FLIPDAY_KEY_PASSWORD }}
+        run: gradle :app:bundleRelease --stacktrace
+      - uses: actions/upload-artifact@v4
+        with:
+          name: flipday-release-aab
+          path: app/build/outputs/bundle/release/app-release.aab

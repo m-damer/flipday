@@ -25,3 +25,6 @@ Output: `app/build/outputs/bundle/release/app-release.aab`. Without the variable
 - Raise `versionCode` for every upload (`app/build.gradle.kts`).
 - Install the release build on a real phone: R8 is on, and only CI has compiled it.
 - Fill the listing from `docs/PLAY_LISTING.md`, then the Data safety form and the exact-alarm declaration if asked.
+
+## Building the signed bundle on GitHub instead of your computer
+`.github/workflows/release.yml` (Actions tab → "Release bundle" → Run workflow) builds and signs the bundle and attaches `flipday-release-aab` to the run. Add these four repository secrets first: `FLIPDAY_KEYSTORE_BASE64` (output of `base64 -w0 flipday-upload.jks`), `FLIPDAY_KEYSTORE_PASSWORD`, `FLIPDAY_KEY_ALIAS` (`flipday`), `FLIPDAY_KEY_PASSWORD`.

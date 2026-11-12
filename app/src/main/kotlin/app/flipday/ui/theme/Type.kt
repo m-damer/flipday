@@ -13,7 +13,7 @@ import app.flipday.R
 
 // Bundled fonts (SIL Open Font License, see docs/licenses): IBM Plex Sans, IBM Plex Sans Arabic, Space Grotesk for the flap digits.
 @OptIn(ExperimentalTextApi::class)
-private fun variable(res: Int, w: FontWeight) = Font(res, w, FontStyle.Normal, FontVariation.Settings(FontVariation.weight(w.weight)))
+private fun variable(res: Int, w: FontWeight) = Font(res, weight = w, style = FontStyle.Normal, variationSettings = FontVariation.Settings(FontVariation.weight(w.weight)))
 
 private val Weights = listOf(FontWeight.Normal, FontWeight.Medium, FontWeight.SemiBold, FontWeight.Bold)
 

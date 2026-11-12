@@ -1,0 +1,53 @@
+package app.flipday.data
+
+import android.content.Context
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
+import app.flipday.core.ArchivePolicy
+import app.flipday.core.NumeralMode
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+
+enum class ThemeMode { SYSTEM, LIGHT, DARK }
+
+data class AppSettings(
+    val numerals: NumeralMode = NumeralMode.MATCH_LANGUAGE,
+    val theme: ThemeMode = ThemeMode.SYSTEM,
+    val notificationsEnabled: Boolean = true,
+    val archiveAfterDays: Int = ArchivePolicy.DEFAULT_AFTER_DAYS,
+    val defaultReminderDaysBefore: Int = 7,
+)
+
+private val Context.dataStore by preferencesDataStore(name = "settings")
+
+class SettingsStore(private val context: Context) {
+    private object K {
+        val numerals = stringPreferencesKey("numerals")
+        val theme = stringPreferencesKey("theme")
+        val notifications = booleanPreferencesKey("notifications")
+        val archiveAfter = intPreferencesKey("archive_after_days")
+        val defaultReminder = intPreferencesKey("default_reminder_days")
+    }
+
+    val settings: Flow<AppSettings> = context.dataStore.data.map { p ->
+        AppSettings(
+            numerals = p[K.numerals]?.let { runCatching { NumeralMode.valueOf(it) }.getOrNull() } ?: NumeralMode.MATCH_LANGUAGE,
+            theme = p[K.theme]?.let { runCatching { ThemeMode.valueOf(it) }.getOrNull() } ?: ThemeMode.SYSTEM,
+            notificationsEnabled = p[K.notifications] ?: true,
+            archiveAfterDays = p[K.archiveAfter] ?: ArchivePolicy.DEFAULT_AFTER_DAYS,
+            defaultReminderDaysBefore = p[K.defaultReminder] ?: 7,
+        )
+    }
+
+    suspend fun setNumerals(m: NumeralMode) = edit { it[K.numerals] = m.name }
+    suspend fun setTheme(m: ThemeMode) = edit { it[K.theme] = m.name }
+    suspend fun setNotifications(on: Boolean) = edit { it[K.notifications] = on }
+
+    private suspend fun edit(block: (androidx.datastore.preferences.core.MutablePreferences) -> Unit) {
+        context.dataStore.edit { block(it) }
+    }
+}

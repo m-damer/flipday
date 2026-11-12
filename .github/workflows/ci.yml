@@ -23,6 +23,8 @@ jobs:
         if: always()
         with:
           name: reports
-          path: |
-            **/build/reports/**
-            app/build/outputs/apk/debug/*.apk
+          path: "**/build/reports/**"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: flipday-debug-apk
+          path: app/build/outputs/apk/debug/*.apk

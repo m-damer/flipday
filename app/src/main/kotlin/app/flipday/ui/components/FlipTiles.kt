@@ -21,7 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import app.flipday.ui.theme.LocalFlap
 import app.flipday.ui.theme.Numerals
@@ -29,6 +29,7 @@ import app.flipday.ui.theme.Numerals
 /**
  * One split-flap tile per character. Digits always read left to right, also in Arabic.
  * The whole row is ONE accessibility element: screen readers announce [description], not digit by digit.
+ * Digit size follows the tile height in dp, not the font scale: at 200% the surrounding text grows but a digit must never outgrow its tile.
  */
 @Composable
 fun FlipNumber(text: String, description: String, tileHeight: Dp = 44.dp, modifier: Modifier = Modifier) {
@@ -45,7 +46,7 @@ fun FlipNumber(text: String, description: String, tileHeight: Dp = 44.dp, modifi
                         .background(flap.tile, RoundedCornerShape(tileHeight / 9)),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Text(ch.toString(), color = flap.digit, fontFamily = Numerals, fontWeight = FontWeight.SemiBold, fontSize = (tileHeight.value * 0.72f).sp)
+                    Text(ch.toString(), color = flap.digit, fontFamily = Numerals, fontWeight = FontWeight.SemiBold, fontSize = with(LocalDensity.current) { (tileHeight * 0.72f).toSp() })
                     Box(Modifier.fillMaxWidth().height(2.dp).background(Color.Black.copy(alpha = 0.55f)))
                 }
             }

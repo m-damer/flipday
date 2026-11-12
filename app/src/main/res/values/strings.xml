@@ -268,4 +268,13 @@
     <string name="licenses_apache">Apache License 2.0</string>
     <string name="licenses_ofl">SIL Open Font License 1.1</string>
     <string name="rate_failed">Could not open the store.</string>
+    <string name="action_share">Share</string>
+    <string name="share_title">Share as</string>
+    <string name="share_square">Square</string>
+    <string name="share_story">Story</string>
+    <string name="share_wide">Wide</string>
+    <string name="share_caption_due">DUE IN</string>
+    <string name="share_text">%1$s: %2$s %3$s</string>
+    <string name="share_chooser">Share event</string>
+    <string name="share_failed">Could not create the image.</string>
 </resources>

@@ -35,6 +35,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.graphics.toArgb
+import app.flipday.ui.theme.LocalFlap
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -79,6 +85,10 @@ fun DetailScreen(factory: ViewModelProvider.Factory, eventId: Long, onBack: () -
     var confirmDelete by remember { mutableStateOf(false) }
     var offerRepeat by remember { mutableStateOf(false) }
     var confirmEnd by remember { mutableStateOf(false) }
+    var sharing by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+    val colors = MaterialTheme.colorScheme
+    val flap = LocalFlap.current
     val e = event
 
     // Event gone (deleted elsewhere or just now): leave quietly.
@@ -99,6 +109,7 @@ fun DetailScreen(factory: ViewModelProvider.Factory, eventId: Long, onBack: () -
                             vm.duplicate(e, context.getString(R.string.duplicate_title, e.title), onOpenEvent)
                         })
                         if (e.type == EventType.COUNTUP) DropdownMenuItem(text = { Text(stringResource(R.string.action_mark_ended)) }, onClick = { menuOpen = false; confirmEnd = true })
+                        DropdownMenuItem(text = { Text(stringResource(R.string.action_share)) }, onClick = { menuOpen = false; sharing = true })
                         DropdownMenuItem(text = { Text(stringResource(R.string.action_archive)) }, onClick = { menuOpen = false; vm.archive(e); onBack() })
                         DropdownMenuItem(text = { Text(stringResource(R.string.action_delete), color = MaterialTheme.colorScheme.error) }, onClick = { menuOpen = false; confirmDelete = true })
                     }
@@ -171,6 +182,34 @@ fun DetailScreen(factory: ViewModelProvider.Factory, eventId: Long, onBack: () -
             text = { Text(stringResource(R.string.delete_body, e.title)) },
             confirmButton = { TextButton(onClick = { confirmDelete = false; vm.delete(e, onBack) }) { Text(stringResource(R.string.action_delete)) } },
             dismissButton = { TextButton(onClick = { confirmDelete = false }) { Text(stringResource(R.string.cancel)) } },
+        )
+        if (sharing) AlertDialog(
+            onDismissRequest = { sharing = false },
+            title = { Text(stringResource(R.string.share_title)) },
+            text = {
+                Column {
+                    listOf(ShareFormat.SQUARE to R.string.share_square, ShareFormat.STORY to R.string.share_story, ShareFormat.WIDE to R.string.share_wide).forEach { (format, label) ->
+                        TextButton(onClick = {
+                            sharing = false
+                            val subtitle = if (e.type == EventType.PERIOD) periodSubtitle(context, e, today, settings.numerals, locale) else d(e.date)
+                            val unitText = context.getString(unit)
+                            val palette = SharePalette(colors.surface.toArgb(), colors.onSurface.toArgb(), colors.onSurfaceVariant.toArgb(), colors.primary.toArgb(), flap.tile.toArgb(), flap.digit.toArgb())
+                            val caption = if (e.type == EventType.COUNTDOWN) context.getString(R.string.share_caption_due) else null
+                            scope.launch {
+                                val ok = runCatching {
+                                    val bitmap = withContext(Dispatchers.Default) {
+                                        ShareCard.render(context, format, e.title, digits, unitText, subtitle, caption, context.getString(R.string.app_name), palette)
+                                    }
+                                    ShareCard.share(context, bitmap, context.getString(R.string.share_text, e.title, digits, unitText), context.getString(R.string.share_chooser))
+                                }.isSuccess
+                                if (!ok) android.widget.Toast.makeText(context, R.string.share_failed, android.widget.Toast.LENGTH_SHORT).show()
+                            }
+                        }) { Text(stringResource(label)) }
+                    }
+                }
+            },
+            confirmButton = {},
+            dismissButton = { TextButton(onClick = { sharing = false }) { Text(stringResource(R.string.cancel)) } },
         )
         if (confirmEnd) {
             val days = EventCalculator.daysSince(e.date, today).coerceAtLeast(0).toInt()

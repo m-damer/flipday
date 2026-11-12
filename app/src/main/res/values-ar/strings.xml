@@ -320,4 +320,13 @@
     <string name="licenses_apache">رخصة أباتشي 2.0</string>
     <string name="licenses_ofl">رخصة الخطوط المفتوحة SIL 1.1</string>
     <string name="rate_failed">تعذّر فتح المتجر.</string>
+    <string name="action_share">مشاركة</string>
+    <string name="share_title">مشاركة بشكل</string>
+    <string name="share_square">مربّع</string>
+    <string name="share_story">قصة</string>
+    <string name="share_wide">عريض</string>
+    <string name="share_caption_due">بعد</string>
+    <string name="share_text">%1$s: %2$s %3$s</string>
+    <string name="share_chooser">مشاركة الحدث</string>
+    <string name="share_failed">تعذّر إنشاء الصورة.</string>
 </resources>

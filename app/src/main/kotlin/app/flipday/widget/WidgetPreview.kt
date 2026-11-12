@@ -24,6 +24,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
@@ -67,7 +68,7 @@ fun WidgetPreview(
                 Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
                     digits.forEach { ch ->
                         Box(Modifier.width(22.dp).height(34.dp).background(Color(0xFF050506), RoundedCornerShape(4.dp)), contentAlignment = Alignment.Center) {
-                            Text(ch.toString(), color = Color(accent.digit), fontSize = 22.sp, fontWeight = FontWeight.Bold)
+                            Text(ch.toString(), color = Color(accent.digit), fontSize = with(LocalDensity.current) { 22.dp.toSp() }, fontWeight = FontWeight.Bold)
                         }
                     }
                 }
@@ -76,7 +77,7 @@ fun WidgetPreview(
             Row(Modifier.padding(vertical = 6.dp), horizontalArrangement = Arrangement.spacedBy(3.dp)) {
                 digits.forEach { ch ->
                     if (flap) Box(Modifier.width(34.dp).height(52.dp).background(Color(0xFF050506), RoundedCornerShape(5.dp)), contentAlignment = Alignment.Center) {
-                        Text(ch.toString(), color = Color(accent.digit), fontSize = 34.sp, fontWeight = FontWeight.Bold)
+                        Text(ch.toString(), color = Color(accent.digit), fontSize = with(LocalDensity.current) { 34.dp.toSp() }, fontWeight = FontWeight.Bold)
                     } else Text(ch.toString(), color = ink, fontSize = 46.sp, fontWeight = FontWeight.Bold)
                 }
             }

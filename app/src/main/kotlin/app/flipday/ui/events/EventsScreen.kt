@@ -44,6 +44,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -79,7 +81,7 @@ fun EventsScreen(factory: ViewModelProvider.Factory, onOpen: (Long) -> Unit, onS
             Column(Modifier.weight(1f)) {
                 Text(stringResource(R.string.upcoming) + " · " + NumeralFormatter.format(today.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(locale)), settings.numerals, locale.toLanguageTag()),
                     style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
-                Text(stringResource(R.string.my_events), style = MaterialTheme.typography.headlineLarge)
+                Text(stringResource(R.string.my_events), style = MaterialTheme.typography.headlineLarge, modifier = Modifier.semantics { heading() })
             }
             IconButton(onClick = onSearch) { Icon(Icons.Filled.Search, contentDescription = stringResource(R.string.search_events)) }
             Box {

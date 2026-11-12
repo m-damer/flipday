@@ -23,6 +23,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -39,6 +40,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelProvider
@@ -76,6 +78,7 @@ fun DetailScreen(factory: ViewModelProvider.Factory, eventId: Long, onBack: () -
     var menuOpen by remember { mutableStateOf(false) }
     var confirmDelete by remember { mutableStateOf(false) }
     var offerRepeat by remember { mutableStateOf(false) }
+    var confirmEnd by remember { mutableStateOf(false) }
     val e = event
 
     // Event gone (deleted elsewhere or just now): leave quietly.
@@ -95,6 +98,7 @@ fun DetailScreen(factory: ViewModelProvider.Factory, eventId: Long, onBack: () -
                             menuOpen = false
                             vm.duplicate(e, context.getString(R.string.duplicate_title, e.title), onOpenEvent)
                         })
+                        if (e.type == EventType.COUNTUP) DropdownMenuItem(text = { Text(stringResource(R.string.action_mark_ended)) }, onClick = { menuOpen = false; confirmEnd = true })
                         DropdownMenuItem(text = { Text(stringResource(R.string.action_archive)) }, onClick = { menuOpen = false; vm.archive(e); onBack() })
                         DropdownMenuItem(text = { Text(stringResource(R.string.action_delete), color = MaterialTheme.colorScheme.error) }, onClick = { menuOpen = false; confirmDelete = true })
                     }
@@ -105,7 +109,10 @@ fun DetailScreen(factory: ViewModelProvider.Factory, eventId: Long, onBack: () -
         if (e == null) return@Scaffold
         val (value, unit) = headline(e, today)
         val digits = n(value.toString().padStart(2, '0'))
-        val description = context.resources.getQuantityString(R.plurals.cd_event, value.toInt(), e.title, value.toInt())
+        val isPeriod = e.type == EventType.PERIOD
+        val subtitle = if (isPeriod) periodSubtitle(context, e, today, settings.numerals, locale) else ""
+        val description = if (isPeriod) "${e.title}, $subtitle, $value ${context.getString(unit)}"
+        else context.resources.getQuantityString(R.plurals.cd_event, value.toInt(), e.title, value.toInt())
         Column(
             Modifier.fillMaxSize().padding(padding).padding(24.dp).verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -115,14 +122,36 @@ fun DetailScreen(factory: ViewModelProvider.Factory, eventId: Long, onBack: () -
             FlipNumber(digits, description, tileHeight = 96.dp)
             Text(stringResource(unit), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Spacer(Modifier.height(8.dp))
-            Text(d(e.date), style = MaterialTheme.typography.bodyLarge)
+            if (!isPeriod) Text(d(e.date), style = MaterialTheme.typography.bodyLarge)
             when (e.type) {
                 EventType.AGE -> {
                     Text(stringResource(R.string.detail_next_birthday, d(EventCalculator.nextBirthday(e.date, today))), style = MaterialTheme.typography.bodyMedium)
                     Text(stringResource(R.string.detail_turns, n(EventCalculator.turnsAge(e.date, today))), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 EventType.COUNTUP -> Text(stringResource(R.string.detail_started, d(e.date)), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                EventType.COUNTDOWN, EventType.PERIOD -> Unit
+                EventType.PERIOD -> {
+                    val end = e.endDate!!
+                    val st = EventCalculator.period(e.date, end, today)
+                    Text(subtitle, style = MaterialTheme.typography.bodyLarge)
+                    LinearProgressIndicator(progress = { st.progress.toFloat() }, modifier = Modifier.fillMaxWidth())
+                    if (st.phase == PeriodPhase.ONGOING) Text(
+                        stringResource(R.string.period_progress, n(st.dayNumber), n(st.totalDays)),
+                        style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    ) else if (st.phase == PeriodPhase.ENDED) Text(
+                        stringResource(R.string.period_completed), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Column(Modifier.weight(1f)) {
+                            Text(stringResource(R.string.detail_from), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(d(e.date), style = MaterialTheme.typography.bodyLarge)
+                        }
+                        Column(Modifier.weight(1f)) {
+                            Text(stringResource(R.string.detail_to), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(d(end), style = MaterialTheme.typography.bodyLarge)
+                        }
+                    }
+                }
+                EventType.COUNTDOWN -> Unit
             }
             if (e.archivedOn != null) {
                 Text(stringResource(R.string.archived_on, d(e.archivedOn!!)), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -143,6 +172,16 @@ fun DetailScreen(factory: ViewModelProvider.Factory, eventId: Long, onBack: () -
             confirmButton = { TextButton(onClick = { confirmDelete = false; vm.delete(e, onBack) }) { Text(stringResource(R.string.action_delete)) } },
             dismissButton = { TextButton(onClick = { confirmDelete = false }) { Text(stringResource(R.string.cancel)) } },
         )
+        if (confirmEnd) {
+            val days = EventCalculator.daysSince(e.date, today).coerceAtLeast(0).toInt()
+            AlertDialog(
+                onDismissRequest = { confirmEnd = false },
+                title = { Text(stringResource(R.string.mark_ended_title, e.title)) },
+                text = { Text(pluralStringResource(R.plurals.mark_ended_body, days, n(days))) },
+                confirmButton = { TextButton(onClick = { confirmEnd = false; vm.markEnded(e) }) { Text(stringResource(R.string.mark_ended_confirm)) } },
+                dismissButton = { TextButton(onClick = { confirmEnd = false }) { Text(stringResource(R.string.cancel)) } },
+            )
+        }
         if (offerRepeat) AlertDialog(
             onDismissRequest = { offerRepeat = false },
             title = { Text(stringResource(R.string.repeat_title)) },

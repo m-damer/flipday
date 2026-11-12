@@ -9,4 +9,4 @@
 **Phase 4** Backup and restore (export/import), exact reminders opt-in, share card, fonts, accessibility pass (200% font scale, TalkBack), tablet layouts, Play listing.
 
 ## Periods (end date)
-See docs/END_DATE.md. Done: logic, tests, Room v2. Next: design board (add form, three phases, widget, Arabic copy), then UI.
+See docs/END_DATE.md. Done: logic, tests, Room v2, design board 06D (approved), UI (editor From/To with validation, list and detail states, Mark as ended, filter chips, EN+AR strings). Next: verify on device, period-specific widget layout, copy-deck rows.

@@ -208,4 +208,53 @@
     <string name="label_to_start">يومًا حتى البدء</string>
     <string name="label_days_left">يومًا متبقيًا</string>
     <string name="label_days_long">يومًا مدّتها</string>
+    <string name="type_period">فترة</string>
+    <string name="type_period_desc">من تاريخ بداية إلى تاريخ نهاية</string>
+    <string name="filter_period">فترات</string>
+    <string name="field_from">من</string>
+    <string name="field_to">إلى</string>
+    <plurals name="period_length">
+        <item quantity="zero">%1$s يوم · اليومان الأول والأخير محسوبان</item>
+        <item quantity="one">يوم واحد · اليومان الأول والأخير محسوبان</item>
+        <item quantity="two">يومان · اليومان الأول والأخير محسوبان</item>
+        <item quantity="few">%1$s أيام · اليومان الأول والأخير محسوبان</item>
+        <item quantity="many">%1$s يومًا · اليومان الأول والأخير محسوبان</item>
+        <item quantity="other">%1$s يوم · اليومان الأول والأخير محسوبان</item>
+    </plurals>
+    <string name="err_end_before_start">يجب أن يكون تاريخ النهاية في يوم البداية أو بعده.</string>
+    <string name="remind_on_last_day">اليوم الأخير</string>
+    <string name="period_last_day">اليوم الأخير اليوم</string>
+    <string name="period_progress">اليوم %1$s من %2$s</string>
+    <string name="period_progress_until">اليوم %1$s من %2$s · حتى %3$s</string>
+    <plurals name="period_starts_lasts">
+        <item quantity="zero">تبدأ %1$s · مدّتها %2$s يوم</item>
+        <item quantity="one">تبدأ %1$s · مدّتها يوم واحد</item>
+        <item quantity="two">تبدأ %1$s · مدّتها يومان</item>
+        <item quantity="few">تبدأ %1$s · مدّتها %2$s أيام</item>
+        <item quantity="many">تبدأ %1$s · مدّتها %2$s يومًا</item>
+        <item quantity="other">تبدأ %1$s · مدّتها %2$s يوم</item>
+    </plurals>
+    <string name="period_ended_today">انتهت اليوم</string>
+    <plurals name="period_ended_ago">
+        <item quantity="zero">انتهت منذ %1$s يوم</item>
+        <item quantity="one">انتهت منذ يوم واحد</item>
+        <item quantity="two">انتهت منذ يومين</item>
+        <item quantity="few">انتهت منذ %1$s أيام</item>
+        <item quantity="many">انتهت منذ %1$s يومًا</item>
+        <item quantity="other">انتهت منذ %1$s يوم</item>
+    </plurals>
+    <string name="period_completed">مكتملة</string>
+    <string name="detail_from">من</string>
+    <string name="detail_to">إلى</string>
+    <string name="action_mark_ended">وضع علامة منتهية</string>
+    <string name="mark_ended_title">إنهاء «%1$s» اليوم؟</string>
+    <plurals name="mark_ended_body">
+        <item quantity="zero">يتوقف العدّاد عند %1$s يوم. يتحوّل الحدث إلى فترة يمكنك فتحها.</item>
+        <item quantity="one">يتوقف العدّاد عند يوم واحد. يتحوّل الحدث إلى فترة يمكنك فتحها.</item>
+        <item quantity="two">يتوقف العدّاد عند يومين. يتحوّل الحدث إلى فترة يمكنك فتحها.</item>
+        <item quantity="few">يتوقف العدّاد عند %1$s أيام. يتحوّل الحدث إلى فترة يمكنك فتحها.</item>
+        <item quantity="many">يتوقف العدّاد عند %1$s يومًا. يتحوّل الحدث إلى فترة يمكنك فتحها.</item>
+        <item quantity="other">يتوقف العدّاد عند %1$s يوم. يتحوّل الحدث إلى فترة يمكنك فتحها.</item>
+    </plurals>
+    <string name="mark_ended_confirm">إنهاء اليوم</string>
 </resources>

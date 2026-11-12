@@ -19,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -62,10 +63,12 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneOffset
+import java.time.temporal.ChronoUnit
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
 private val ReminderPresets = listOf(0, 1, 3, 7)
+private val PeriodReminderPresets = listOf(0, 1, 7)
 
 /** Add (eventId == null) and edit share one form, as in the design ("Same form with Delete"). */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -86,7 +89,9 @@ fun EditorScreen(factory: ViewModelProvider.Factory, eventId: Long?, onClose: ()
     var time by remember { mutableStateOf<LocalTime?>(null) }
     var reminderDays by remember { mutableStateOf<Set<Int>?>(null) }
     var repeatYearly by remember { mutableStateOf(false) }
-    var pickingDate by remember { mutableStateOf(false) }
+    var endDate by remember { mutableStateOf(today.plusDays(7)) }
+    /** 0 = closed, 1 = start date, 2 = end date. */
+    var pickingDate by remember { mutableStateOf(0) }
     var pickingTime by remember { mutableStateOf(false) }
     var pendingEvent by remember { mutableStateOf<Event?>(null) }
     val context = androidx.compose.ui.platform.LocalContext.current
@@ -96,7 +101,7 @@ fun EditorScreen(factory: ViewModelProvider.Factory, eventId: Long?, onClose: ()
 
     LaunchedEffect(eventId) {
         if (eventId != null) vm.load(eventId)?.let { e ->
-            original = e; type = e.type; title = e.title; date = e.date; time = e.time
+            original = e; type = e.type; title = e.title; date = e.date; endDate = e.endDate ?: e.date.plusDays(7); time = e.time
             reminderDays = e.reminders.map { it.daysBefore }.toSet(); repeatYearly = e.repeatYearly
         }
     }
@@ -106,16 +111,19 @@ fun EditorScreen(factory: ViewModelProvider.Factory, eventId: Long?, onClose: ()
     val fmt = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(locale)
     val pastCountdown = eventId == null && type == EventType.COUNTDOWN && date.isBefore(today)
     val hasReminders = type != EventType.COUNTUP
+    val endBeforeStart = type == EventType.PERIOD && endDate.isBefore(date)
+    val periodDays = ChronoUnit.DAYS.between(date, endDate) + 1
 
     fun save() {
         if (title.isBlank()) { titleError = true; return }
-        if (pastCountdown) return
+        if (pastCountdown || endBeforeStart) return
         val base = original
         val rules = if (hasReminders) selectedReminders.sorted().map { d ->
             ReminderRule(d, base?.reminders?.firstOrNull { it.daysBefore == d }?.at ?: LocalTime.of(9, 0))
         } else emptyList()
-        val event = (base ?: Event(title = title.trim(), type = type, date = date)).copy(
+        val event = (base ?: Event(title = title.trim(), type = type, date = date, endDate = if (type == EventType.PERIOD) endDate else null)).copy(
             title = title.trim(), type = type, date = date,
+            endDate = if (type == EventType.PERIOD) endDate else null,
             time = if (type == EventType.COUNTDOWN) time else null,
             startDate = base?.startDate ?: if (type == EventType.COUNTDOWN) today else null,
             reminders = rules,
@@ -130,12 +138,12 @@ fun EditorScreen(factory: ViewModelProvider.Factory, eventId: Long?, onClose: ()
         TopAppBar(
             title = { Text(stringResource(if (eventId == null) R.string.new_event else R.string.edit_event)) },
             navigationIcon = { IconButton(onClick = onClose) { Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.close)) } },
-            actions = { TextButton(onClick = ::save) { Text(stringResource(R.string.save)) } },
+            actions = { TextButton(onClick = ::save, enabled = !endBeforeStart) { Text(stringResource(R.string.save)) } },
         )
     }) { padding ->
         Column(Modifier.fillMaxSize().padding(padding).padding(16.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                listOf(EventType.COUNTDOWN to R.string.type_countdown, EventType.AGE to R.string.type_birthday, EventType.COUNTUP to R.string.type_countup)
+            Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                listOf(EventType.COUNTDOWN to R.string.type_countdown, EventType.AGE to R.string.type_birthday, EventType.COUNTUP to R.string.type_countup, EventType.PERIOD to R.string.type_period)
                     .forEach { (t, label) -> FilterChip(selected = type == t, onClick = { type = t }, label = { Text(stringResource(label)) }) }
             }
             OutlinedTextField(
@@ -143,8 +151,20 @@ fun EditorScreen(factory: ViewModelProvider.Factory, eventId: Long?, onClose: ()
                 label = { Text(stringResource(R.string.field_title)) }, isError = titleError,
                 supportingText = if (titleError) ({ Text(stringResource(R.string.err_title_empty)) }) else null,
             )
-            OutlinedButton(onClick = { pickingDate = true }, modifier = Modifier.fillMaxWidth()) {
-                Text(stringResource(R.string.field_date) + ": " + NumeralFormatter.format(date.format(fmt), settings.numerals, tag))
+            OutlinedButton(onClick = { pickingDate = 1 }, modifier = Modifier.fillMaxWidth()) {
+                val label = if (type == EventType.PERIOD) R.string.field_from else R.string.field_date
+                Text(stringResource(label) + ": " + NumeralFormatter.format(date.format(fmt), settings.numerals, tag))
+            }
+            if (type == EventType.PERIOD) {
+                OutlinedButton(
+                    onClick = { pickingDate = 2 }, modifier = Modifier.fillMaxWidth(),
+                    colors = if (endBeforeStart) ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error) else ButtonDefaults.outlinedButtonColors(),
+                ) { Text(stringResource(R.string.field_to) + ": " + NumeralFormatter.format(endDate.format(fmt), settings.numerals, tag)) }
+                if (endBeforeStart) Text(stringResource(R.string.err_end_before_start), color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium)
+                else Text(
+                    pluralStringResource(R.plurals.period_length, periodDays.toInt(), NumeralFormatter.format(periodDays.toString(), settings.numerals, tag)),
+                    style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
             if (pastCountdown) {
                 Text(stringResource(R.string.err_date_past), color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium)
@@ -161,12 +181,12 @@ fun EditorScreen(factory: ViewModelProvider.Factory, eventId: Long?, onClose: ()
             if (hasReminders) {
                 Text(stringResource(R.string.remind_title), style = MaterialTheme.typography.titleSmall)
                 Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    ReminderPresets.forEach { d ->
+                    (if (type == EventType.PERIOD) PeriodReminderPresets else ReminderPresets).forEach { d ->
                         FilterChip(
                             selected = d in selectedReminders,
                             onClick = { reminderDays = if (d in selectedReminders) selectedReminders - d else selectedReminders + d },
                             label = {
-                                Text(if (d == 0) stringResource(R.string.remind_on_day)
+                                Text(if (d == 0) stringResource(if (type == EventType.PERIOD) R.string.remind_on_last_day else R.string.remind_on_day)
                                 else pluralStringResource(R.plurals.remind_days_before, d, NumeralFormatter.format(d.toString(), settings.numerals, tag)))
                             },
                         )
@@ -192,17 +212,22 @@ fun EditorScreen(factory: ViewModelProvider.Factory, eventId: Long?, onClose: ()
         )
     }
 
-    if (pickingDate) {
-        val state = rememberDatePickerState(initialSelectedDateMillis = date.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli())
+    if (pickingDate != 0) {
+        val editingEnd = pickingDate == 2
+        val initial = if (editingEnd) endDate else date
+        val state = rememberDatePickerState(initialSelectedDateMillis = initial.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli())
         DatePickerDialog(
-            onDismissRequest = { pickingDate = false },
+            onDismissRequest = { pickingDate = 0 },
             confirmButton = {
                 TextButton(onClick = {
-                    state.selectedDateMillis?.let { date = Instant.ofEpochMilli(it).atZone(ZoneOffset.UTC).toLocalDate() }
-                    pickingDate = false
+                    state.selectedDateMillis?.let {
+                        val picked = Instant.ofEpochMilli(it).atZone(ZoneOffset.UTC).toLocalDate()
+                        if (editingEnd) endDate = picked else date = picked
+                    }
+                    pickingDate = 0
                 }) { Text(stringResource(R.string.ok)) }
             },
-            dismissButton = { TextButton(onClick = { pickingDate = false }) { Text(stringResource(R.string.cancel)) } },
+            dismissButton = { TextButton(onClick = { pickingDate = 0 }) { Text(stringResource(R.string.cancel)) } },
         ) { DatePicker(state = state) }
     }
 

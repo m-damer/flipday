@@ -94,6 +94,7 @@ fun EventsScreen(factory: ViewModelProvider.Factory, onOpen: (Long) -> Unit, onS
             listOf(
                 null to R.string.filter_all, EventType.COUNTDOWN to R.string.filter_countdown,
                 EventType.AGE to R.string.filter_birthdays, EventType.COUNTUP to R.string.filter_countup,
+                EventType.PERIOD to R.string.filter_period,
             ).forEach { (f, label) ->
                 FilterChip(selected = query.type == f, onClick = { vm.setType(f) }, label = { Text(stringResource(label)) })
             }
@@ -129,7 +130,7 @@ private fun SortFilterSheet(query: EventQuery, onDismiss: () -> Unit, onApply: (
             }
             Text(stringResource(R.string.filter_show), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                listOf(null to R.string.filter_all, EventType.COUNTDOWN to R.string.filter_countdown, EventType.AGE to R.string.filter_birthdays, EventType.COUNTUP to R.string.filter_countup)
+                listOf(null to R.string.filter_all, EventType.COUNTDOWN to R.string.filter_countdown, EventType.AGE to R.string.filter_birthdays, EventType.COUNTUP to R.string.filter_countup, EventType.PERIOD to R.string.filter_period)
                     .forEach { (ty, label) -> FilterChip(selected = type == ty, onClick = { type = ty }, label = { Text(stringResource(label)) }) }
             }
             Row(Modifier.fillMaxWidth().toggleable(value = completed, role = Role.Checkbox, onValueChange = { completed = it }), verticalAlignment = Alignment.CenterVertically) {
@@ -159,8 +160,11 @@ internal fun EventRow(event: Event, today: LocalDate, numerals: NumeralMode, tag
     val locale = LocalConfiguration.current.locales[0]
     val (value, unit) = headline(event, today)
     val digits = NumeralFormatter.format(value.toString().padStart(2, '0'), numerals, tag)
-    val description = context.resources.getQuantityString(R.plurals.cd_event, value.toInt(), event.title, value.toInt())
-    val shownDate = event.date.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(locale))
+    val isPeriod = event.type == EventType.PERIOD
+    val shownDate = if (isPeriod) periodSubtitle(context, event, today, numerals, locale)
+    else event.date.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(locale))
+    val description = if (isPeriod) "${event.title}, $shownDate, $value ${context.getString(unit)}"
+    else context.resources.getQuantityString(R.plurals.cd_event, value.toInt(), event.title, value.toInt())
 
     Surface(onClick = onClick, shape = MaterialTheme.shapes.small, color = MaterialTheme.colorScheme.surface, modifier = Modifier.fillMaxWidth()) {
         Row(Modifier.padding(horizontal = 16.dp, vertical = 14.dp), verticalAlignment = Alignment.CenterVertically) {

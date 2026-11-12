@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import app.flipday.AppContainer
 import app.flipday.core.Event
+import app.flipday.core.EventCalculator
 import app.flipday.core.EventQueries
 import app.flipday.core.EventQuery
 import app.flipday.core.EventSort
@@ -88,6 +89,9 @@ class DetailViewModel(private val c: AppContainer) : ViewModel() {
             onDone()
         }
     }
+
+    /** Stops a running count-up: it becomes a period that ends today. */
+    fun markEnded(event: Event) { viewModelScope.launch { c.repository.save(EventCalculator.markEnded(event, LocalDate.now())) } }
 
     fun archive(event: Event) { viewModelScope.launch { c.repository.archive(event, LocalDate.now()) } }
 

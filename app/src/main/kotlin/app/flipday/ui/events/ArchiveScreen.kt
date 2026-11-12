@@ -59,7 +59,7 @@ fun ArchiveScreen(factory: ViewModelProvider.Factory, onBack: () -> Unit, onOpen
     }) { padding ->
         Column(Modifier.fillMaxSize().padding(padding)) {
             Row(Modifier.horizontalScroll(rememberScrollState()).padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                listOf(null to R.string.filter_all, EventType.COUNTDOWN to R.string.filter_past, EventType.COUNTUP to R.string.filter_countup, EventType.AGE to R.string.filter_birthdays)
+                listOf(null to R.string.filter_all, EventType.COUNTDOWN to R.string.filter_past, EventType.COUNTUP to R.string.filter_countup, EventType.AGE to R.string.filter_birthdays, EventType.PERIOD to R.string.filter_period)
                     .forEach { (t, label) -> FilterChip(selected = selected == t, onClick = { vm.setType(t) }, label = { Text(stringResource(label)) }) }
             }
             val list = events

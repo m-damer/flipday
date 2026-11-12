@@ -184,4 +184,37 @@
     <string name="label_to_start">days to start</string>
     <string name="label_days_left">days left</string>
     <string name="label_days_long">days long</string>
+    <string name="type_period">Period</string>
+    <string name="type_period_desc">From a start date to an end date</string>
+    <string name="filter_period">Periods</string>
+    <string name="field_from">From</string>
+    <string name="field_to">To</string>
+    <plurals name="period_length">
+        <item quantity="one">%1$s day \u00b7 both days count</item>
+        <item quantity="other">%1$s days \u00b7 both days count</item>
+    </plurals>
+    <string name="err_end_before_start">The end date must be on or after the start date.</string>
+    <string name="remind_on_last_day">Last day</string>
+    <string name="period_last_day">Last day today</string>
+    <string name="period_progress">Day %1$s of %2$s</string>
+    <string name="period_progress_until">Day %1$s of %2$s \u00b7 until %3$s</string>
+    <plurals name="period_starts_lasts">
+        <item quantity="one">Starts %1$s \u00b7 lasts %2$s day</item>
+        <item quantity="other">Starts %1$s \u00b7 lasts %2$s days</item>
+    </plurals>
+    <string name="period_ended_today">Ended today</string>
+    <plurals name="period_ended_ago">
+        <item quantity="one">Ended %1$s day ago</item>
+        <item quantity="other">Ended %1$s days ago</item>
+    </plurals>
+    <string name="period_completed">Completed</string>
+    <string name="detail_from">From</string>
+    <string name="detail_to">To</string>
+    <string name="action_mark_ended">Mark as ended</string>
+    <string name="mark_ended_title">End \u201c%1$s\u201d today?</string>
+    <plurals name="mark_ended_body">
+        <item quantity="one">The counter stops at %1$s day. The event becomes a period you can still open.</item>
+        <item quantity="other">The counter stops at %1$s days. The event becomes a period you can still open.</item>
+    </plurals>
+    <string name="mark_ended_confirm">End today</string>
 </resources>

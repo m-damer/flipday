@@ -181,4 +181,7 @@
     <string name="style_flap_desc">Split-flap tiles on a card. Follows light and dark.</string>
     <string name="style_paper_desc">Large numerals on a colour card.</string>
     <string name="widgets_pin_unsupported">Your launcher cannot add widgets from here. Long-press the home screen and choose Flipday.</string>
+    <string name="label_to_start">days to start</string>
+    <string name="label_days_left">days left</string>
+    <string name="label_days_long">days long</string>
 </resources>

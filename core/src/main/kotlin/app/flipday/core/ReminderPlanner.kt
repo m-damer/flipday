@@ -11,6 +11,8 @@ object ReminderPlanner {
         EventType.COUNTDOWN -> event.date
         EventType.AGE -> EventCalculator.nextBirthday(event.date, today)
         EventType.COUNTUP -> null
+        // Reminders for a period count back from its last day ("ends in 3 days").
+        EventType.PERIOD -> event.endDate
     }
 
     /** Future triggers only, soonest first. Count-ups use [milestoneTrigger] instead. */

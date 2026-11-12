@@ -49,6 +49,7 @@ import app.flipday.core.Event
 import app.flipday.core.EventCalculator
 import app.flipday.core.EventPhase
 import app.flipday.core.EventType
+import app.flipday.core.PeriodPhase
 import app.flipday.core.NumeralFormatter
 import app.flipday.ui.DetailViewModel
 import app.flipday.ui.SettingsViewModel
@@ -121,7 +122,7 @@ fun DetailScreen(factory: ViewModelProvider.Factory, eventId: Long, onBack: () -
                     Text(stringResource(R.string.detail_turns, n(EventCalculator.turnsAge(e.date, today))), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 EventType.COUNTUP -> Text(stringResource(R.string.detail_started, d(e.date)), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                EventType.COUNTDOWN -> Unit
+                EventType.COUNTDOWN, EventType.PERIOD -> Unit
             }
             if (e.archivedOn != null) {
                 Text(stringResource(R.string.archived_on, d(e.archivedOn!!)), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -161,4 +162,12 @@ internal fun headline(event: Event, today: LocalDate): Pair<Long, Int> = when (e
     }
     EventType.AGE -> EventCalculator.age(event.date, today).years.toLong() to R.string.label_years_old
     EventType.COUNTUP -> EventCalculator.daysSince(event.date, today) to R.string.label_since
+    EventType.PERIOD -> {
+        val s = EventCalculator.period(event.date, event.endDate!!, today)
+        when (s.phase) {
+            PeriodPhase.UPCOMING -> s.daysToStart to R.string.label_to_start
+            PeriodPhase.ONGOING -> s.daysLeft to R.string.label_days_left
+            PeriodPhase.ENDED -> s.totalDays to R.string.label_days_long
+        }
+    }
 }

@@ -21,6 +21,8 @@ data class EventEntity(
     val repeatYearly: Boolean,
     val archivedEpochDay: Long?,
     val milestoneEveryDays: Int?,
+    /** Period end day (added in database version 2). */
+    val endEpochDay: Long? = null,
 )
 
 fun EventEntity.toDomain() = Event(
@@ -31,6 +33,7 @@ fun EventEntity.toDomain() = Event(
         val (d, m) = it.split('@'); ReminderRule(d.toInt(), LocalTime.ofSecondOfDay(m.toInt() * 60L))
     },
     repeatYearly = repeatYearly, archivedOn = archivedEpochDay?.let(LocalDate::ofEpochDay), milestoneEveryDays = milestoneEveryDays,
+    endDate = endEpochDay?.let(LocalDate::ofEpochDay),
 )
 
 fun Event.toEntity() = EventEntity(
@@ -38,4 +41,5 @@ fun Event.toEntity() = EventEntity(
     minuteOfDay = time?.let { it.hour * 60 + it.minute }, startEpochDay = startDate?.toEpochDay(),
     reminders = reminders.joinToString(",") { "${it.daysBefore}@${it.at.hour * 60 + it.at.minute}" },
     repeatYearly = repeatYearly, archivedEpochDay = archivedOn?.toEpochDay(), milestoneEveryDays = milestoneEveryDays,
+    endEpochDay = endDate?.toEpochDay(),
 )

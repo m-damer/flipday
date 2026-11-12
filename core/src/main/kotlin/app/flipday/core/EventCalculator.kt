@@ -51,4 +51,32 @@ object EventCalculator {
 
     /** Days until the next multiple of [step] since the start (for "1,000 days" milestones). */
     fun daysToMilestone(daysSince: Long, step: Long = 1000): Long = step - (daysSince % step)
+
+    /**
+     * Both the first and the last day count, so Mon to Fri is 5 days. [dayNumber] is 1 on the first day and [daysLeft] is 0 on the last day.
+     * Values that do not apply to the current phase are 0.
+     */
+    data class PeriodStatus(
+        val phase: PeriodPhase, val totalDays: Long, val dayNumber: Long,
+        val daysToStart: Long, val daysLeft: Long, val daysSinceEnd: Long, val progress: Double,
+    )
+
+    fun period(start: LocalDate, end: LocalDate, today: LocalDate): PeriodStatus {
+        val total = ChronoUnit.DAYS.between(start, end) + 1
+        return when {
+            today.isBefore(start) -> PeriodStatus(PeriodPhase.UPCOMING, total, 0, ChronoUnit.DAYS.between(today, start), 0, 0, 0.0)
+            today.isAfter(end) -> PeriodStatus(PeriodPhase.ENDED, total, 0, 0, 0, ChronoUnit.DAYS.between(end, today), 1.0)
+            else -> {
+                val n = ChronoUnit.DAYS.between(start, today) + 1
+                PeriodStatus(PeriodPhase.ONGOING, total, n, 0, ChronoUnit.DAYS.between(today, end), 0, n.toDouble() / total)
+            }
+        }
+    }
+
+    /** Turns a running count-up into a finished period that ends [today]. The counter stops and shows how long it lasted. */
+    fun markEnded(event: Event, today: LocalDate): Event {
+        require(event.type == EventType.COUNTUP) { "only a count-up can be marked as ended" }
+        val end = if (today.isBefore(event.date)) event.date else today
+        return event.copy(type = EventType.PERIOD, endDate = end, milestoneEveryDays = null, reminders = emptyList())
+    }
 }

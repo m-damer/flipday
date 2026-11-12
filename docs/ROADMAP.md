@@ -7,3 +7,6 @@
 **Phase 3** (in progress) done: per-widget setup, studio (event, style, colours, text), gallery, midnight refresh, sizes. Left: ring, age, date and live-ticker templates, lock-screen widget.
 
 **Phase 4** Backup and restore (export/import), exact reminders opt-in, share card, fonts, accessibility pass (200% font scale, TalkBack), tablet layouts, Play listing.
+
+## Periods (end date)
+See docs/END_DATE.md. Done: logic, tests, Room v2. Next: design board (add form, three phases, widget, Arabic copy), then UI.

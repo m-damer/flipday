@@ -15,9 +15,16 @@ data class EventQuery(
 /** Pure list logic for Events, Search and Archive. Matches design board 06C.6 (Sort and filter). */
 object EventQueries {
 
-    /** A countdown whose date has passed and that does not repeat. Not yet archived, so still in the main list data. */
-    fun isCompleted(event: Event, today: LocalDate): Boolean =
-        event.type == EventType.COUNTDOWN && !event.repeatYearly && event.date.isBefore(today)
+    /** A countdown whose date has passed (and does not repeat), or a period that has ended. Not yet archived. */
+    fun isCompleted(event: Event, today: LocalDate): Boolean = when (event.type) {
+        EventType.COUNTDOWN -> !event.repeatYearly && event.date.isBefore(today)
+        EventType.PERIOD -> event.endDate?.isBefore(today) == true
+        else -> false
+    }
+
+    /** The next date that matters: a period's start while it is ahead, then its end. */
+    private fun sortDate(e: Event, today: LocalDate): LocalDate? =
+        if (e.type == EventType.PERIOD && today.isBefore(e.date)) e.date else ReminderPlanner.anchorDate(e, today)
 
     /** Active events: not archived, completed ones only when [EventQuery.showCompleted]. */
     fun active(events: List<Event>, q: EventQuery, today: LocalDate): List<Event> =
@@ -40,8 +47,8 @@ object EventQueries {
         EventSort.NAME -> list.sortedBy { it.title.lowercase() }
         EventSort.DATE_ADDED -> list.sortedByDescending { it.id }
         EventSort.NEAREST -> {
-            val (upcoming, rest) = list.partition { ReminderPlanner.anchorDate(it, today)?.let { d -> !d.isBefore(today) } == true && !isCompleted(it, today) }
-            upcoming.sortedBy { ReminderPlanner.anchorDate(it, today) } + rest.sortedByDescending { it.date }
+            val (upcoming, rest) = list.partition { sortDate(it, today)?.let { d -> !d.isBefore(today) } == true && !isCompleted(it, today) }
+            upcoming.sortedBy { sortDate(it, today) } + rest.sortedByDescending { it.date }
         }
     }
 }

@@ -7,7 +7,31 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Switch
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.glance.appwidget.state.getAppWidgetState
+import androidx.glance.state.PreferencesGlanceStateDefinition
+import app.flipday.core.EventType
+import app.flipday.core.NumeralFormatter
+import app.flipday.core.ReminderPlanner
+import app.flipday.data.AppSettings
+import app.flipday.ui.events.headline
+import java.time.LocalDate
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -64,41 +88,110 @@ class WidgetConfigActivity : AppCompatActivity() {
         setContent {
             FlipdayTheme(dark = isSystemInDarkTheme()) {
                 val events by container.repository.observeEvents().collectAsState(initial = emptyList())
+                val settings by container.settings.settings.collectAsState(initial = AppSettings())
                 val active = events.filter { it.archivedOn == null }
                 var eventId by remember { mutableLongStateOf(0L) }
-                var template by remember { mutableStateOf(WidgetTemplate.FLAP) }
+                var template by remember { mutableStateOf(WidgetDraft.template) }
+                var accent by remember { mutableStateOf(WidgetAccent.TEAL) }
+                var showTitle by remember { mutableStateOf(true) }
+                var showUnit by remember { mutableStateOf(true) }
+                // Reconfiguring an existing widget starts from its saved choices.
+                LaunchedEffect(Unit) {
+                    runCatching {
+                        val gid = GlanceAppWidgetManager(this@WidgetConfigActivity).getGlanceIdBy(appWidgetId)
+                        val saved = getAppWidgetState(this@WidgetConfigActivity, PreferencesGlanceStateDefinition, gid)
+                        saved[WidgetKeys.EVENT_ID]?.let { eventId = it }
+                        saved[WidgetKeys.TEMPLATE]?.let { template = WidgetTemplate.parse(it) }
+                        saved[WidgetKeys.ACCENT]?.let { accent = WidgetAccent.parse(it) }
+                        saved[WidgetKeys.SHOW_TITLE]?.let { showTitle = it }
+                        saved[WidgetKeys.SHOW_UNIT]?.let { showUnit = it }
+                    }
+                }
+                val today = LocalDate.now()
+                val shown = if (eventId > 0) active.firstOrNull { it.id == eventId } else active.filter { it.type != EventType.COUNTUP }
+                    .mapNotNull { e -> ReminderPlanner.anchorDate(e, today)?.takeIf { !it.isBefore(today) }?.let { e to it } }.minByOrNull { it.second }?.first
+                val tag = resources.configuration.locales[0].toLanguageTag()
+                val (value, unitRes) = shown?.let { headline(it, today) } ?: (24L to R.string.label_days)
+                val previewTitle = shown?.title ?: stringResource(R.string.widget_sample_title)
+                val digits = NumeralFormatter.format(value.toString().padStart(2, '0'), settings.numerals, tag)
+                val unitText = stringResource(unitRes)
+
                 Scaffold(topBar = {
                     TopAppBar(
                         title = { Text(stringResource(R.string.widget_setup_title)) },
                         navigationIcon = { IconButton(onClick = { finish() }) { Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.close)) } },
                     )
-                }) { padding ->
-                    Column(Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp)) {
-                        LazyColumn(Modifier.weight(1f)) {
-                            item { ChoiceRow(stringResource(R.string.widget_nearest), eventId == 0L) { eventId = 0L } }
-                            items(active, key = { it.id }) { e -> ChoiceRow(e.title, eventId == e.id) { eventId = e.id } }
-                        }
-                        Text(stringResource(R.string.widget_style), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 8.dp))
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(vertical = 8.dp)) {
-                            FilterChip(selected = template == WidgetTemplate.FLAP, onClick = { template = WidgetTemplate.FLAP }, label = { Text(stringResource(R.string.style_flap)) })
-                            FilterChip(selected = template == WidgetTemplate.PAPER, onClick = { template = WidgetTemplate.PAPER }, label = { Text(stringResource(R.string.style_paper)) })
-                        }
-                        Button(onClick = {
-                            lifecycleScope.launch {
-                                val gid = GlanceAppWidgetManager(this@WidgetConfigActivity).getGlanceIdBy(appWidgetId)
-                                updateAppWidgetState(this@WidgetConfigActivity, gid) { p ->
-                                    p[WidgetKeys.EVENT_ID] = eventId
-                                    p[WidgetKeys.TEMPLATE] = template.name
-                                }
-                                FlipdayWidget().update(this@WidgetConfigActivity, gid)
-                                setResult(Activity.RESULT_OK, Intent().putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId))
-                                finish()
+                }, bottomBar = {
+                    Button(onClick = {
+                        lifecycleScope.launch {
+                            val gid = GlanceAppWidgetManager(this@WidgetConfigActivity).getGlanceIdBy(appWidgetId)
+                            updateAppWidgetState(this@WidgetConfigActivity, gid) { p ->
+                                p[WidgetKeys.EVENT_ID] = eventId
+                                p[WidgetKeys.TEMPLATE] = template.name
+                                p[WidgetKeys.ACCENT] = accent.name
+                                p[WidgetKeys.SHOW_TITLE] = showTitle
+                                p[WidgetKeys.SHOW_UNIT] = showUnit
                             }
-                        }, modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)) { Text(stringResource(R.string.save)) }
+                            FlipdayWidget().update(this@WidgetConfigActivity, gid)
+                            setResult(Activity.RESULT_OK, Intent().putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId))
+                            finish()
+                        }
+                    }, modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(16.dp)) { Text(stringResource(R.string.save)) }
+                }) { padding ->
+                    LazyColumn(Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp)) {
+                        item {
+                            Box(Modifier.fillMaxWidth().padding(vertical = 8.dp), contentAlignment = Alignment.Center) {
+                                WidgetPreview(previewTitle, digits, unitText, "$previewTitle, $digits $unitText", template, accent, showTitle, showUnit, Modifier.width(170.dp))
+                            }
+                        }
+                        item { Label(stringResource(R.string.widget_content)) }
+                        item { ChoiceRow(stringResource(R.string.widget_nearest), eventId == 0L) { eventId = 0L } }
+                        items(active, key = { it.id }) { e -> ChoiceRow(e.title, eventId == e.id) { eventId = e.id } }
+                        item { Label(stringResource(R.string.widget_style)) }
+                        item {
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                FilterChip(selected = template == WidgetTemplate.FLAP, onClick = { template = WidgetTemplate.FLAP }, label = { Text(stringResource(R.string.style_flap)) })
+                                FilterChip(selected = template == WidgetTemplate.PAPER, onClick = { template = WidgetTemplate.PAPER }, label = { Text(stringResource(R.string.style_paper)) })
+                            }
+                        }
+                        item { Label(stringResource(R.string.widget_colors)) }
+                        item {
+                            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                                WidgetAccent.entries.forEach { a ->
+                                    val name = stringResource(accentName(a))
+                                    Box(
+                                        Modifier.size(44.dp).clip(CircleShape).background(Color(a.bgDay))
+                                            .border(if (a == accent) 3.dp else 0.dp, MaterialTheme.colorScheme.onSurface, CircleShape)
+                                            .selectable(selected = a == accent, role = Role.RadioButton, onClick = { accent = a })
+                                            .semantics { contentDescription = name },
+                                    )
+                                }
+                            }
+                        }
+                        item { Label(stringResource(R.string.widget_text)) }
+                        item { SwitchRow(stringResource(R.string.widget_show_title), showTitle) { showTitle = it } }
+                        item { SwitchRow(stringResource(R.string.widget_show_unit), showUnit) { showUnit = it } }
                     }
                 }
             }
         }
+    }
+}
+
+private fun accentName(a: WidgetAccent) = when (a) {
+    WidgetAccent.TEAL -> R.string.accent_teal; WidgetAccent.INDIGO -> R.string.accent_indigo
+    WidgetAccent.ROSE -> R.string.accent_rose; WidgetAccent.AMBER -> R.string.accent_amber
+}
+
+@Composable
+private fun Label(text: String) =
+    Text(text, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 16.dp, bottom = 4.dp))
+
+@Composable
+private fun SwitchRow(label: String, checked: Boolean, onChange: (Boolean) -> Unit) {
+    Row(Modifier.fillMaxWidth().heightIn(min = 52.dp).toggleable(value = checked, role = Role.Switch, onValueChange = onChange), verticalAlignment = Alignment.CenterVertically) {
+        Text(label, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+        Switch(checked = checked, onCheckedChange = null)
     }
 }
 

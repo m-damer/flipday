@@ -168,4 +168,17 @@
     <string name="widget_style">STYLE</string>
     <string name="style_flap">Flap</string>
     <string name="style_paper">Paper</string>
+    <string name="widget_content">CONTENT</string>
+    <string name="widget_colors">COLORS</string>
+    <string name="widget_text">TEXT</string>
+    <string name="widget_show_title">Show title</string>
+    <string name="widget_show_unit">Show unit</string>
+    <string name="widget_sample_title">Summer trip</string>
+    <string name="accent_teal">Teal</string>
+    <string name="accent_indigo">Indigo</string>
+    <string name="accent_rose">Rose</string>
+    <string name="accent_amber">Amber</string>
+    <string name="style_flap_desc">Split-flap tiles on a card. Follows light and dark.</string>
+    <string name="style_paper_desc">Large numerals on a colour card.</string>
+    <string name="widgets_pin_unsupported">Your launcher cannot add widgets from here. Long-press the home screen and choose Flipday.</string>
 </resources>

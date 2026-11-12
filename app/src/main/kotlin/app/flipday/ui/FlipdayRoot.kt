@@ -109,7 +109,7 @@ fun FlipdayRoot(factory: ViewModelProvider.Factory, openEventId: Long? = null, o
     ) { padding ->
         NavHost(nav, startDestination = Routes.EVENTS, modifier = Modifier.padding(padding)) {
             composable(Routes.EVENTS) { EventsScreen(factory, onOpen = { nav.navigate("detail/$it") }, onSearch = { nav.navigate(Routes.SEARCH) }, onArchive = { nav.navigate(Routes.ARCHIVE) }) }
-            composable(Routes.WIDGETS) { WidgetsScreen() }
+            composable(Routes.WIDGETS) { WidgetsScreen(factory) }
             composable(Routes.SETTINGS) { SettingsScreen(factory, onAbout = { nav.navigate(Routes.ABOUT) }) }
             composable(Routes.SEARCH) { SearchScreen(factory, onBack = { nav.popBackStack() }, onOpen = { nav.navigate("detail/$it") }) }
             composable(Routes.ARCHIVE) {

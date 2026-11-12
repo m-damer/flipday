@@ -56,7 +56,6 @@ private val LARGE = DpSize(250.dp, 250.dp)
 // Glance cannot read the Compose theme, so widget colours live here (allowed by CLAUDE.md, phase 1 note).
 private fun dn(day: Long, night: Long) = DayNight(Color(day), Color(night))
 private val TileBg = ColorProvider(Color(0xFF050506))
-private val Mint = ColorProvider(Color(0xFF5EE0C4))
 
 /**
  * Shows one event as flap tiles. Which event and which style come from per-widget state (set in the setup screen);
@@ -78,20 +77,21 @@ class FlipdayWidget : GlanceAppWidget() {
             val prefs = currentState<Preferences>()
             val chosen = prefs[WidgetKeys.EVENT_ID] ?: 0L
             val template = WidgetTemplate.parse(prefs[WidgetKeys.TEMPLATE])
+            val look = Look(template, WidgetAccent.parse(prefs[WidgetKeys.ACCENT]), prefs[WidgetKeys.SHOW_TITLE] ?: true, prefs[WidgetKeys.SHOW_UNIT] ?: true)
             val today = LocalDate.now()
             val size = LocalSize.current
 
             val event: Event? = if (chosen > 0) events.firstOrNull { it.id == chosen } else nearest(events, today)
             when {
-                chosen > 0 && event == null -> Message(context.getString(R.string.widget_choose), template, configureAction(context, appWidgetId))
-                event == null -> Message(context.getString(R.string.widget_empty), template, actionStartActivity(Intent(context, MainActivity::class.java)))
+                chosen > 0 && event == null -> Message(context.getString(R.string.widget_choose), look, configureAction(context, appWidgetId))
+                event == null -> Message(context.getString(R.string.widget_empty), look, actionStartActivity(Intent(context, MainActivity::class.java)))
                 else -> {
                     val (value, unitRes) = headline(event, today)
                     val digits = NumeralFormatter.format(value.toString().padStart(2, '0'), numerals, tag)
                     val open = actionStartActivity(
                         Intent(context, MainActivity::class.java).putExtra(MainActivity.EXTRA_EVENT_ID, event.id).setData(Uri.parse("flipday://event/${event.id}")),
                     )
-                    Content(event.title, digits, context.getString(unitRes), template, size, open)
+                    Content(event.title, digits, context.getString(unitRes), look, size, open)
                 }
             }
         }
@@ -108,36 +108,38 @@ class FlipdayWidget : GlanceAppWidget() {
     )
 }
 
-private fun bg(t: WidgetTemplate) = if (t == WidgetTemplate.FLAP) dn(0xFFFFFFFF, 0xFF171719) else dn(0xFF0F766E, 0xFF0B4F49)
-private fun ink(t: WidgetTemplate) = if (t == WidgetTemplate.FLAP) dn(0xFF1A1A1C, 0xFFF2EFE6) else ColorProvider(Color(0xFFFFFFFF))
-private fun muted(t: WidgetTemplate) = if (t == WidgetTemplate.FLAP) dn(0xFF625E54, 0xFFB8B4A8) else ColorProvider(Color(0xFFD7EFEA))
+private data class Look(val template: WidgetTemplate, val accent: WidgetAccent, val showTitle: Boolean, val showUnit: Boolean)
+
+private fun bg(l: Look) = if (l.template == WidgetTemplate.FLAP) dn(0xFFFFFFFF, 0xFF171719) else dn(l.accent.bgDay, l.accent.bgNight)
+private fun ink(l: Look) = if (l.template == WidgetTemplate.FLAP) dn(0xFF1A1A1C, 0xFFF2EFE6) else ColorProvider(Color(0xFFFFFFFF))
+private fun muted(l: Look) = if (l.template == WidgetTemplate.FLAP) dn(0xFF625E54, 0xFFB8B4A8) else ColorProvider(Color(0xFFE8F4F1))
 
 @Composable
-private fun Message(text: String, template: WidgetTemplate, action: Action) {
-    Box(GlanceModifier.fillMaxSize().background(bg(template)).padding(12.dp).clickable(action), contentAlignment = Alignment.Center) {
-        Text(text, style = TextStyle(color = ink(template), fontSize = 14.sp, fontWeight = FontWeight.Medium))
+private fun Message(text: String, look: Look, action: Action) {
+    Box(GlanceModifier.fillMaxSize().background(bg(look)).padding(12.dp).clickable(action), contentAlignment = Alignment.Center) {
+        Text(text, style = TextStyle(color = ink(look), fontSize = 14.sp, fontWeight = FontWeight.Medium))
     }
 }
 
 @Composable
-private fun Content(title: String, digits: String, unit: String, template: WidgetTemplate, size: DpSize, open: Action) {
+private fun Content(title: String, digits: String, unit: String, look: Look, size: DpSize, open: Action) {
     val wide = size.width >= 200.dp && size.height < 200.dp
     val large = size.height >= 200.dp
     val tileHeight = when { large -> 84.dp; wide -> 56.dp; else -> 52.dp }
-    Box(GlanceModifier.fillMaxSize().background(bg(template)).padding(12.dp).clickable(open), contentAlignment = Alignment.Center) {
+    Box(GlanceModifier.fillMaxSize().background(bg(look)).padding(12.dp).clickable(open), contentAlignment = Alignment.Center) {
         if (wide) {
             Row(GlanceModifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically) {
                 Column(GlanceModifier.defaultWeight()) {
-                    Text(title, maxLines = 2, style = TextStyle(color = ink(template), fontSize = 16.sp, fontWeight = FontWeight.Medium))
-                    Text(unit, style = TextStyle(color = muted(template), fontSize = 13.sp))
+                    if (look.showTitle) Text(title, maxLines = 2, style = TextStyle(color = ink(look), fontSize = 16.sp, fontWeight = FontWeight.Medium))
+                    if (look.showUnit) Text(unit, style = TextStyle(color = muted(look), fontSize = 13.sp))
                 }
-                Numbers(digits, tileHeight, template)
+                Numbers(digits, tileHeight, look)
             }
         } else {
             Column(GlanceModifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalAlignment = Alignment.CenterVertically) {
-                Text(title, maxLines = if (large) 2 else 1, style = TextStyle(color = ink(template), fontSize = if (large) 18.sp else 14.sp, fontWeight = FontWeight.Medium))
-                Box(GlanceModifier.padding(vertical = 6.dp)) { Numbers(digits, tileHeight, template) }
-                Text(unit, style = TextStyle(color = muted(template), fontSize = if (large) 15.sp else 12.sp))
+                if (look.showTitle) Text(title, maxLines = if (large) 2 else 1, style = TextStyle(color = ink(look), fontSize = if (large) 18.sp else 14.sp, fontWeight = FontWeight.Medium))
+                Box(GlanceModifier.padding(vertical = 6.dp)) { Numbers(digits, tileHeight, look) }
+                if (look.showUnit) Text(unit, style = TextStyle(color = muted(look), fontSize = if (large) 15.sp else 12.sp))
             }
         }
     }
@@ -145,16 +147,16 @@ private fun Content(title: String, digits: String, unit: String, template: Widge
 
 /** Digits read left to right in every language, like the in-app tiles. */
 @Composable
-private fun Numbers(digits: String, height: androidx.compose.ui.unit.Dp, template: WidgetTemplate) {
+private fun Numbers(digits: String, height: androidx.compose.ui.unit.Dp, look: Look) {
     Row {
         digits.forEach { ch ->
-            if (template == WidgetTemplate.FLAP) {
+            if (look.template == WidgetTemplate.FLAP) {
                 Box(GlanceModifier.width(height * 0.66f).height(height).background(TileBg), contentAlignment = Alignment.Center) {
-                    Text(ch.toString(), style = TextStyle(color = Mint, fontSize = (height.value * 0.66f).sp, fontWeight = FontWeight.Bold))
+                    Text(ch.toString(), style = TextStyle(color = ColorProvider(Color(look.accent.digit)), fontSize = (height.value * 0.66f).sp, fontWeight = FontWeight.Bold))
                 }
                 Box(GlanceModifier.width(3.dp)) {}
             } else {
-                Text(ch.toString(), style = TextStyle(color = ink(template), fontSize = (height.value * 0.9f).sp, fontWeight = FontWeight.Bold))
+                Text(ch.toString(), style = TextStyle(color = ink(look), fontSize = (height.value * 0.9f).sp, fontWeight = FontWeight.Bold))
             }
         }
     }

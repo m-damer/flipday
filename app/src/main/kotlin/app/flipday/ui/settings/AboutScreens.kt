@@ -1,5 +1,21 @@
 package app.flipday.ui.settings
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.compose.viewModel
+import app.flipday.core.NumeralFormatter
+import app.flipday.ui.SettingsViewModel
+import app.flipday.widget.WidgetAccent
+import app.flipday.widget.WidgetDraft
+import app.flipday.widget.WidgetPreview
+import app.flipday.widget.WidgetTemplate
 import android.appwidget.AppWidgetManager
 import android.content.ActivityNotFoundException
 import android.content.ComponentName
@@ -101,15 +117,40 @@ fun DeveloperScreen(onBack: () -> Unit) {
 }
 
 @Composable
-fun WidgetsScreen() {
+fun WidgetsScreen(factory: ViewModelProvider.Factory) {
     val context = LocalContext.current
-    Column(Modifier.fillMaxSize().padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    val settingsVm: SettingsViewModel = viewModel(factory = factory)
+    val settings by settingsVm.settings.collectAsState()
+    val tag = LocalConfiguration.current.locales[0].toLanguageTag()
+    val digits = NumeralFormatter.format("24", settings.numerals, tag)
+    val title = stringResource(R.string.widget_sample_title)
+    val unit = stringResource(R.string.label_days)
+    var unsupported by remember { mutableStateOf(false) }
+
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         Text(stringResource(R.string.tab_widgets), style = MaterialTheme.typography.headlineSmall)
         Text(stringResource(R.string.widgets_intro), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Button(onClick = {
-            val manager = AppWidgetManager.getInstance(context)
-            if (manager.isRequestPinAppWidgetSupported) manager.requestPinAppWidget(ComponentName(context, FlipdayWidgetReceiver::class.java), null, null)
-        }) { Text(stringResource(R.string.widget_add)) }
+        listOf(
+            Triple(WidgetTemplate.FLAP, R.string.style_flap, R.string.style_flap_desc),
+            Triple(WidgetTemplate.PAPER, R.string.style_paper, R.string.style_paper_desc),
+        ).forEach { (template, name, desc) ->
+            Surface(shape = MaterialTheme.shapes.large, color = MaterialTheme.colorScheme.surface, modifier = Modifier.fillMaxWidth()) {
+                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                        WidgetPreview(title, digits, unit, "$title, $digits $unit", template, WidgetAccent.TEAL, true, true, Modifier.width(170.dp))
+                    }
+                    Text(stringResource(name), style = MaterialTheme.typography.titleMedium)
+                    Text(stringResource(desc), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Button(onClick = {
+                        WidgetDraft.template = template
+                        val manager = AppWidgetManager.getInstance(context)
+                        if (manager.isRequestPinAppWidgetSupported) manager.requestPinAppWidget(ComponentName(context, FlipdayWidgetReceiver::class.java), null, null)
+                        else unsupported = true
+                    }) { Text(stringResource(R.string.widget_add)) }
+                }
+            }
+        }
+        if (unsupported) Text(stringResource(R.string.widgets_pin_unsupported), color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium)
     }
 }
 

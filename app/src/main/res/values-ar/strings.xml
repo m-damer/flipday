@@ -192,4 +192,17 @@
     <string name="widget_style">النمط</string>
     <string name="style_flap">فليب</string>
     <string name="style_paper">ورقي</string>
+    <string name="widget_content">المحتوى</string>
+    <string name="widget_colors">الألوان</string>
+    <string name="widget_text">النص</string>
+    <string name="widget_show_title">إظهار العنوان</string>
+    <string name="widget_show_unit">إظهار الوحدة</string>
+    <string name="widget_sample_title">رحلة الصيف</string>
+    <string name="accent_teal">فيروزي</string>
+    <string name="accent_indigo">نيلي</string>
+    <string name="accent_rose">وردي</string>
+    <string name="accent_amber">كهرماني</string>
+    <string name="style_flap_desc">بلاطات فليب على بطاقة. تتبع المظهر الفاتح والداكن.</string>
+    <string name="style_paper_desc">أرقام كبيرة على بطاقة ملوّنة.</string>
+    <string name="widgets_pin_unsupported">لا يدعم اللانشر إضافة الودجات من هنا. اضغط مطولًا على الشاشة الرئيسية واختر فليب داي.</string>
 </resources>

@@ -91,7 +91,7 @@ fun DeveloperScreen(onBack: () -> Unit) {
             androidx.compose.material3.Surface(shape = MaterialTheme.shapes.large, color = MaterialTheme.colorScheme.surface, modifier = Modifier.fillMaxWidth()) {
                 Column {
                     ValueRow(stringResource(R.string.dev_whatsapp), DeveloperInfo.WHATSAPP_DISPLAY, onClick = { open(context, Intent(Intent.ACTION_VIEW, Uri.parse(DeveloperInfo.WHATSAPP_URL))) })
-                    ValueRow(stringResource(R.string.dev_email), DeveloperInfo.EMAIL, last = true, onClick = { openEmail(context) })
+                    ValueRow(stringResource(R.string.dev_email), DeveloperInfo.EMAIL_DISPLAY, last = true, onClick = { openEmail(context) })
                 }
             }
             Spacer(Modifier.height(16.dp))

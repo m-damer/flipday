@@ -68,7 +68,7 @@ import java.time.format.FormatStyle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DetailScreen(factory: ViewModelProvider.Factory, eventId: Long, onBack: () -> Unit, onEdit: (Long) -> Unit, onOpenEvent: (Long) -> Unit) {
+fun DetailScreen(factory: ViewModelProvider.Factory, eventId: Long, onBack: () -> Unit, onEdit: (Long) -> Unit, onOpenEvent: (Long) -> Unit, showBack: Boolean = true) {
     val vm: DetailViewModel = viewModel(factory = factory)
     val settingsVm: SettingsViewModel = viewModel(factory = factory)
     val settings by settingsVm.settings.collectAsState()
@@ -98,7 +98,7 @@ fun DetailScreen(factory: ViewModelProvider.Factory, eventId: Long, onBack: () -
     Scaffold(topBar = {
         TopAppBar(
             title = {},
-            navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back)) } },
+            navigationIcon = { if (showBack) IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back)) } },
             actions = {
                 if (e != null && e.archivedOn == null) Box {
                     IconButton(onClick = { menuOpen = true }) { Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.more_options)) }

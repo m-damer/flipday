@@ -65,7 +65,7 @@ import java.time.format.FormatStyle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EventsScreen(factory: ViewModelProvider.Factory, onOpen: (Long) -> Unit, onSearch: () -> Unit, onArchive: () -> Unit) {
+fun EventsScreen(factory: ViewModelProvider.Factory, onOpen: (Long) -> Unit, onSearch: () -> Unit, onArchive: () -> Unit, selectedId: Long? = null) {
     val vm: EventsViewModel = viewModel(factory = factory)
     val settingsVm: SettingsViewModel = viewModel(factory = factory)
     val events by vm.events.collectAsState()
@@ -107,7 +107,7 @@ fun EventsScreen(factory: ViewModelProvider.Factory, onOpen: (Long) -> Unit, onS
             list == null -> Unit
             list.isEmpty() -> EmptyState()
             else -> LazyColumn(contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                items(list, key = { it.id }) { EventRow(it, today, settings.numerals, locale.toLanguageTag(), onClick = { onOpen(it.id) }) }
+                items(list, key = { it.id }) { EventRow(it, today, settings.numerals, locale.toLanguageTag(), onClick = { onOpen(it.id) }, selected = it.id == selectedId) }
             }
         }
     }
@@ -157,7 +157,7 @@ private fun EmptyState() {
 }
 
 @Composable
-internal fun EventRow(event: Event, today: LocalDate, numerals: NumeralMode, tag: String, onClick: () -> Unit) {
+internal fun EventRow(event: Event, today: LocalDate, numerals: NumeralMode, tag: String, onClick: () -> Unit, selected: Boolean = false) {
     val context = LocalContext.current
     val locale = LocalConfiguration.current.locales[0]
     val (value, unit) = headline(event, today)
@@ -168,7 +168,11 @@ internal fun EventRow(event: Event, today: LocalDate, numerals: NumeralMode, tag
     val description = if (isPeriod) "${event.title}, $shownDate, $value ${context.getString(unit)}"
     else context.resources.getQuantityString(R.plurals.cd_event, value.toInt(), event.title, value.toInt())
 
-    Surface(onClick = onClick, shape = MaterialTheme.shapes.small, color = MaterialTheme.colorScheme.surface, modifier = Modifier.fillMaxWidth()) {
+    Surface(
+        onClick = onClick, shape = MaterialTheme.shapes.small, modifier = Modifier.fillMaxWidth(),
+        color = if (selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface,
+        border = if (selected) androidx.compose.foundation.BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
+    ) {
         Row(Modifier.padding(horizontal = 16.dp, vertical = 14.dp), verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
                 Text(event.title, style = MaterialTheme.typography.titleMedium)

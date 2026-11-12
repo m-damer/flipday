@@ -23,6 +23,16 @@ import androidx.compose.runtime.remember
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.material3.VerticalDivider
+import androidx.compose.material3.NavigationRailItem
+import androidx.compose.material3.NavigationRail
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Box
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.ViewModelProvider
@@ -67,6 +77,10 @@ private val tabs = listOf(
 @Composable
 fun FlipdayRoot(factory: ViewModelProvider.Factory, openEventId: Long? = null, onOpened: () -> Unit = {}) {
     val nav = rememberNavController()
+    val widthDp = LocalConfiguration.current.screenWidthDp
+    val useRail = widthDp >= 600
+    val twoPane = widthDp >= 840
+    var selectedEvent by rememberSaveable { mutableStateOf<Long?>(null) }
     LaunchedEffect(openEventId) { openEventId?.let { nav.navigate("detail/$it"); onOpened() } }
     val entry by nav.currentBackStackEntryAsState()
     val route = entry?.destination?.route
@@ -93,7 +107,7 @@ fun FlipdayRoot(factory: ViewModelProvider.Factory, openEventId: Long? = null, o
             }
         },
         bottomBar = {
-            if (onTab) NavigationBar {
+            if (onTab && !useRail) NavigationBar {
                 tabs.forEach { t ->
                     NavigationBarItem(
                         selected = route == t.route,
@@ -110,8 +124,38 @@ fun FlipdayRoot(factory: ViewModelProvider.Factory, openEventId: Long? = null, o
             }
         },
     ) { padding ->
-        NavHost(nav, startDestination = Routes.EVENTS, modifier = Modifier.padding(padding)) {
-            composable(Routes.EVENTS) { EventsScreen(factory, onOpen = { nav.navigate("detail/$it") }, onSearch = { nav.navigate(Routes.SEARCH) }, onArchive = { nav.navigate(Routes.ARCHIVE) }) }
+        Row(Modifier.padding(padding)) {
+        if (onTab && useRail) NavigationRail {
+            tabs.forEach { t ->
+                NavigationRailItem(
+                    selected = route == t.route,
+                    onClick = {
+                        nav.navigate(t.route) {
+                            popUpTo(nav.graph.findStartDestination().id) { saveState = true }
+                            launchSingleTop = true; restoreState = true
+                        }
+                    },
+                    icon = { Icon(t.icon, contentDescription = null) },
+                    label = { Text(stringResource(t.label)) },
+                )
+            }
+        }
+        NavHost(nav, startDestination = Routes.EVENTS, modifier = Modifier.weight(1f)) {
+            composable(Routes.EVENTS) {
+                if (twoPane) Row(Modifier.fillMaxSize()) {
+                    Box(Modifier.weight(0.4f)) {
+                        EventsScreen(factory, onOpen = { selectedEvent = it }, onSearch = { nav.navigate(Routes.SEARCH) }, onArchive = { nav.navigate(Routes.ARCHIVE) }, selectedId = selectedEvent)
+                    }
+                    VerticalDivider()
+                    Box(Modifier.weight(0.6f)) {
+                        val id = selectedEvent
+                        if (id != null) DetailScreen(
+                            factory, id, onBack = { selectedEvent = null }, onEdit = { e -> nav.navigate("edit/$e") },
+                            onOpenEvent = { n -> selectedEvent = n }, showBack = false,
+                        )
+                    }
+                } else EventsScreen(factory, onOpen = { nav.navigate("detail/$it") }, onSearch = { nav.navigate(Routes.SEARCH) }, onArchive = { nav.navigate(Routes.ARCHIVE) })
+            }
             composable(Routes.WIDGETS) { WidgetsScreen(factory) }
             composable(Routes.SETTINGS) { SettingsScreen(factory, onAbout = { nav.navigate(Routes.ABOUT) }, onBackup = { nav.navigate(Routes.BACKUP) }) }
             composable(Routes.SEARCH) { SearchScreen(factory, onBack = { nav.popBackStack() }, onOpen = { nav.navigate("detail/$it") }) }
@@ -133,6 +177,7 @@ fun FlipdayRoot(factory: ViewModelProvider.Factory, openEventId: Long? = null, o
             composable(Routes.PRIVACY) { PrivacyScreen(onBack = { nav.popBackStack() }) }
             composable(Routes.LICENSES) { LicensesScreen(onBack = { nav.popBackStack() }) }
             composable(Routes.DEVELOPER) { DeveloperScreen(onBack = { nav.popBackStack() }) }
+        }
         }
     }
 }

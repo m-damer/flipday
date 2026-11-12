@@ -270,4 +270,40 @@
     <string name="ticker_minutes">دقائق</string>
     <string name="widget_updated">حُدّث %1$s</string>
     <string name="widget_turns">تبلغ %1$s</string>
+    <string name="backup_title">النسخ الاحتياطي والاستعادة</string>
+    <string name="backup_export">تصدير إلى ملف</string>
+    <string name="backup_import">استيراد من ملف</string>
+    <string name="backup_note">يُجري أندرويد نسخًا احتياطيًا للأحداث والإعدادات تلقائيًا عند تفعيل نسخ الجهاز. أما الودجات فلا تُنسخ، وستضيفها من جديد على هاتف جديد. ملف التصدير يحتوي على أحداثك فقط.</string>
+    <string name="backup_export_name">flipday-backup-%1$s.json</string>
+    <string name="backup_exported">تم حفظ النسخة.</string>
+    <string name="backup_export_failed">تعذّر حفظ الملف.</string>
+    <string name="backup_import_title">استيراد الأحداث؟</string>
+    <plurals name="backup_import_body">
+        <item quantity="zero">إضافة %1$s حدث من هذا الملف؟ الأحداث الموجودة لديك تُتخطّى.</item>
+        <item quantity="one">إضافة حدث واحد من هذا الملف؟ الأحداث الموجودة لديك تُتخطّى.</item>
+        <item quantity="two">إضافة حدثين من هذا الملف؟ الأحداث الموجودة لديك تُتخطّى.</item>
+        <item quantity="few">إضافة %1$s أحداث من هذا الملف؟ الأحداث الموجودة لديك تُتخطّى.</item>
+        <item quantity="many">إضافة %1$s حدثًا من هذا الملف؟ الأحداث الموجودة لديك تُتخطّى.</item>
+        <item quantity="other">إضافة %1$s حدث من هذا الملف؟ الأحداث الموجودة لديك تُتخطّى.</item>
+    </plurals>
+    <string name="backup_import_add">إضافة</string>
+    <string name="backup_nothing_new">لا جديد: كل أحداث هذا الملف موجودة هنا بالفعل.</string>
+    <plurals name="backup_import_done">
+        <item quantity="zero">تمت إضافة %1$s حدث.</item>
+        <item quantity="one">تمت إضافة حدث واحد.</item>
+        <item quantity="two">تمت إضافة حدثين.</item>
+        <item quantity="few">تمت إضافة %1$s أحداث.</item>
+        <item quantity="many">تمت إضافة %1$s حدثًا.</item>
+        <item quantity="other">تمت إضافة %1$s حدث.</item>
+    </plurals>
+    <plurals name="backup_skipped">
+        <item quantity="zero">تعذّرت قراءة %1$s حدث.</item>
+        <item quantity="one">تعذّرت قراءة حدث واحد.</item>
+        <item quantity="two">تعذّرت قراءة حدثين.</item>
+        <item quantity="few">تعذّرت قراءة %1$s أحداث.</item>
+        <item quantity="many">تعذّرت قراءة %1$s حدثًا.</item>
+        <item quantity="other">تعذّرت قراءة %1$s حدث.</item>
+    </plurals>
+    <string name="backup_bad_file">هذا الملف ليس نسخة احتياطية من فليب داي.</string>
+    <string name="backup_newer_file">أُنشئت هذه النسخة بإصدار أحدث من فليب داي. حدّث التطبيق لاستيرادها.</string>
 </resources>

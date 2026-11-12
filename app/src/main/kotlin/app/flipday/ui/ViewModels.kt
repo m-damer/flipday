@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import app.flipday.AppContainer
+import app.flipday.core.BackupCodec
+import app.flipday.core.BackupContents
 import app.flipday.core.Event
 import app.flipday.core.EventCalculator
 import app.flipday.core.EventQueries
@@ -106,6 +108,18 @@ class DetailViewModel(private val c: AppContainer) : ViewModel() {
     }
 }
 
+class BackupViewModel(private val c: AppContainer) : ViewModel() {
+    suspend fun exportText(): String = BackupCodec.encode(c.repository.all(), LocalDate.now())
+
+    /** Events from [contents] that are not already stored. */
+    suspend fun newEvents(contents: BackupContents): List<Event> {
+        val have = c.repository.all()
+        return contents.events.filter { e -> have.none { BackupCodec.sameEvent(it, e) } }
+    }
+
+    suspend fun add(events: List<Event>) { events.forEach { c.repository.save(it.copy(id = 0)) } }
+}
+
 class SettingsViewModel(private val c: AppContainer) : ViewModel() {
     val settings: StateFlow<AppSettings> = c.settings.settings.stateIn(viewModelScope, SharingStarted.Eagerly, AppSettings())
     fun setNumerals(m: NumeralMode) { viewModelScope.launch { c.settings.setNumerals(m) } }
@@ -125,6 +139,7 @@ class AppViewModelFactory(private val c: AppContainer) : ViewModelProvider.Facto
         EditorViewModel::class.java -> EditorViewModel(c)
         DetailViewModel::class.java -> DetailViewModel(c)
         SettingsViewModel::class.java -> SettingsViewModel(c)
+        BackupViewModel::class.java -> BackupViewModel(c)
         else -> error("Unknown ViewModel ${modelClass.name}")
     } as T
 }

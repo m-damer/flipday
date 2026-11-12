@@ -52,7 +52,7 @@ import androidx.compose.material3.Icon
  * Language and display, Data, About. Settings is a tab root, so there is no back arrow.
  */
 @Composable
-fun SettingsScreen(factory: ViewModelProvider.Factory, onAbout: () -> Unit) {
+fun SettingsScreen(factory: ViewModelProvider.Factory, onAbout: () -> Unit, onBackup: () -> Unit) {
     val vm: SettingsViewModel = viewModel(factory = factory)
     val s by vm.settings.collectAsState()
     var dialog by remember { mutableStateOf<String?>(null) }
@@ -79,7 +79,7 @@ fun SettingsScreen(factory: ViewModelProvider.Factory, onAbout: () -> Unit) {
             ValueRow(stringResource(R.string.set_week_start), stringResource(R.string.coming_soon), enabled = false, last = true)
         }
         Section(R.string.settings_data) {
-            ValueRow(stringResource(R.string.set_backup), stringResource(R.string.coming_soon), enabled = false, last = true)
+            ValueRow(stringResource(R.string.set_backup), "", last = true, onClick = onBackup)
         }
         Section(R.string.settings_about) {
             ValueRow(stringResource(R.string.set_about_app), "", last = true, onClick = onAbout)

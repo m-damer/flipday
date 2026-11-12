@@ -230,4 +230,28 @@
     <string name="ticker_minutes">Min</string>
     <string name="widget_updated">updated %1$s</string>
     <string name="widget_turns">Turns %1$s</string>
+    <string name="backup_title">Backup and restore</string>
+    <string name="backup_export">Export to file</string>
+    <string name="backup_import">Import from file</string>
+    <string name="backup_note">Events and settings are backed up automatically by Android when device backup is on. Widgets are not, so you will add them again on a new phone. A file export contains your events only.</string>
+    <string name="backup_export_name">flipday-backup-%1$s.json</string>
+    <string name="backup_exported">Backup saved.</string>
+    <string name="backup_export_failed">Could not save the file.</string>
+    <string name="backup_import_title">Import events?</string>
+    <plurals name="backup_import_body">
+        <item quantity="one">Add %1$s new event from this file? Events you already have are skipped.</item>
+        <item quantity="other">Add %1$s new events from this file? Events you already have are skipped.</item>
+    </plurals>
+    <string name="backup_import_add">Add</string>
+    <string name="backup_nothing_new">Nothing new: every event in this file is already here.</string>
+    <plurals name="backup_import_done">
+        <item quantity="one">Added %1$s event.</item>
+        <item quantity="other">Added %1$s events.</item>
+    </plurals>
+    <plurals name="backup_skipped">
+        <item quantity="one">%1$s event could not be read.</item>
+        <item quantity="other">%1$s events could not be read.</item>
+    </plurals>
+    <string name="backup_bad_file">This file is not a Flipday backup.</string>
+    <string name="backup_newer_file">This backup was made by a newer version of Flipday. Update the app to import it.</string>
 </resources>

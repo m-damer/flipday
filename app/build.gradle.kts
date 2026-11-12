@@ -16,7 +16,7 @@ android {
         versionCode = 1
         versionName = "0.1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        androidResources { localeFilters += listOf("en", "ar") }
+        resourceConfigurations += listOf("en", "ar")
     }
 
     buildTypes {

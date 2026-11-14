@@ -79,7 +79,6 @@
     <string name="notif_today">اليوم: %1$s</string>
     <string name="notif_tomorrow">غدًا: %1$s</string>
     <string name="notif_open">فتح</string>
-    <string name="widget_desc">الأيام المتبقية لحدثك القادم</string>
     <string name="widget_empty">اضغط لإضافة حدث</string>
     <string name="widget_deleted">الحدث محذوف</string>
     <string name="widgets_intro">أضف ودجت فليب داي إلى شاشتك الرئيسية لترى الأيام المتبقية لحدثك القادم.</string>
@@ -189,8 +188,6 @@
     <string name="widget_setup_title">اختر حدثًا</string>
     <string name="widget_nearest">أقرب حدث قادم</string>
     <string name="widget_style">النمط</string>
-    <string name="style_flap">فليب</string>
-    <string name="style_paper">ورقي</string>
     <string name="widget_content">المحتوى</string>
     <string name="widget_colors">الألوان</string>
     <string name="widget_text">النص</string>
@@ -201,8 +198,6 @@
     <string name="accent_indigo">نيلي</string>
     <string name="accent_rose">وردي</string>
     <string name="accent_amber">كهرماني</string>
-    <string name="style_flap_desc">بلاطات فليب على بطاقة. تتبع المظهر الفاتح والداكن.</string>
-    <string name="style_paper_desc">أرقام كبيرة على بطاقة ملوّنة.</string>
     <string name="widgets_pin_unsupported">لا يدعم اللانشر إضافة الودجات من هنا. اضغط مطولًا على الشاشة الرئيسية واختر فليب داي.</string>
     <string name="label_to_start">يومًا حتى البدء</string>
     <string name="label_days_left">يومًا متبقيًا</string>
@@ -256,14 +251,6 @@
         <item quantity="other">يتوقف العدّاد عند %1$s يوم. يتحوّل الحدث إلى فترة يمكنك فتحها.</item>
     </plurals>
     <string name="mark_ended_confirm">إنهاء اليوم</string>
-    <string name="style_ring">حلقة</string>
-    <string name="style_age">العمر</string>
-    <string name="style_date">التاريخ</string>
-    <string name="style_ticker">عدّاد حيّ</string>
-    <string name="style_ring_desc">حلقة تُظهر نسبة الوقت المنقضي.</string>
-    <string name="style_age_desc">العمر بلوحات الفلاب مع موعد العيد القادم.</string>
-    <string name="style_date_desc">التاريخ ككتلة مع الأيام المتبقية.</string>
-    <string name="style_ticker_desc">أيام وساعات ودقائق. يتحدّث كل ١٥ دقيقة تقريبًا وعند فتح القفل.</string>
     <string name="ticker_days">أيام</string>
     <string name="ticker_hours">ساعات</string>
     <string name="ticker_minutes">دقائق</string>
@@ -329,4 +316,80 @@
     <string name="share_text">%1$s: %2$s %3$s</string>
     <string name="share_chooser">مشاركة الحدث</string>
     <string name="share_failed">تعذّر إنشاء الصورة.</string>
+    <string name="style_big">رقم كبير</string>
+    <string name="style_age">عدّاد العمر</string>
+    <string name="style_countup">عدّ تصاعدي</string>
+    <string name="style_agenda">القائمة</string>
+    <string name="style_ring">حلقة التقدّم</string>
+    <string name="style_date">بطاقة التاريخ</string>
+    <string name="style_ticker">عدّاد حيّ</string>
+    <string name="style_year">تقدّم السنة</string>
+    <string name="style_big_desc">بلاطات فليب بالأيام المتبقية. شريط وصغير ومتوسط وكبير.</string>
+    <string name="style_age_desc">العمر ببلاطات فليب مع العيد القادم والأيام التي عاشها.</string>
+    <string name="style_countup_desc">الأيام المنقضية مع المحطة التالية.</string>
+    <string name="style_agenda_desc">أحداثك القادمة في قائمة.</string>
+    <string name="style_ring_desc">حلقة تُظهر نسبة الوقت المنقضي.</string>
+    <string name="style_date_desc">التاريخ كورقة تقويم، مع عرض الشهر في الحجم الكبير.</string>
+    <string name="style_ticker_desc">أيام وساعات ودقائق. يتحدّث كل ١٥ دقيقة تقريبًا وعند فتح القفل.</string>
+    <string name="style_year_desc">نسبة ما مضى من هذه السنة، أسبوعًا بأسبوع.</string>
+    <string name="wd_due_in">بعد</string>
+    <string name="wd_upcoming">القادمة</string>
+    <string name="wd_next_up">الأقرب</string>
+    <string name="wd_next_milestone">المحطة التالية</string>
+    <string name="wd_since">منذ %1$s</string>
+    <string name="wd_next_line">التالي: %1$s يوم %2$s</string>
+    <string name="wd_more">+%1$s أخرى</string>
+    <string name="wd_due_on">%1$s</string>
+    <string name="wd_ticker_short">%1$sي %2$s:%3$s</string>
+    <string name="wd_year_week">%1$s · الأسبوع %2$s</string>
+    <string name="wd_week_of">الأسبوع %1$s / %2$s</string>
+    <string name="wd_week_label">الأسبوع</string>
+    <string name="wd_days_left_stat">أيام متبقية</string>
+    <string name="wd_next_event">الحدث التالي</string>
+    <string name="wd_day_short">ي</string>
+    <string name="wd_days_lived">%1$s يومًا عاشها</string>
+    <string name="wd_weeks_lived">%1$s أسبوعًا</string>
+    <string name="wd_years">سنوات</string>
+    <string name="wd_months">أشهر</string>
+    <string name="wd_days">أيام</string>
+    <plurals name="wd_turns_in">
+        <item quantity="zero">تبلغ %1$s اليوم</item>
+        <item quantity="one">تبلغ %1$s غدًا</item>
+        <item quantity="two">تبلغ %1$s بعد يومين</item>
+        <item quantity="few">تبلغ %1$s بعد %2$s أيام</item>
+        <item quantity="many">تبلغ %1$s بعد %2$s يومًا</item>
+        <item quantity="other">تبلغ %1$s بعد %2$s يوم</item>
+    </plurals>
+    <plurals name="wd_in_days">
+        <item quantity="zero">اليوم</item>
+        <item quantity="one">غدًا</item>
+        <item quantity="two">بعد يومين</item>
+        <item quantity="few">بعد %1$s أيام</item>
+        <item quantity="many">بعد %1$s يومًا</item>
+        <item quantity="other">بعد %1$s يوم</item>
+    </plurals>
+    <plurals name="wd_n_years">
+        <item quantity="zero">%1$s سنة</item>
+        <item quantity="one">سنة</item>
+        <item quantity="two">سنتان</item>
+        <item quantity="few">%1$s سنوات</item>
+        <item quantity="many">%1$s سنة</item>
+        <item quantity="other">%1$s سنة</item>
+    </plurals>
+    <plurals name="wd_n_months">
+        <item quantity="zero">%1$s شهر</item>
+        <item quantity="one">شهر</item>
+        <item quantity="two">شهران</item>
+        <item quantity="few">%1$s أشهر</item>
+        <item quantity="many">%1$s شهرًا</item>
+        <item quantity="other">%1$s شهر</item>
+    </plurals>
+    <plurals name="wd_n_days">
+        <item quantity="zero">%1$s يوم</item>
+        <item quantity="one">يوم</item>
+        <item quantity="two">يومان</item>
+        <item quantity="few">%1$s أيام</item>
+        <item quantity="many">%1$s يومًا</item>
+        <item quantity="other">%1$s يوم</item>
+    </plurals>
 </resources>

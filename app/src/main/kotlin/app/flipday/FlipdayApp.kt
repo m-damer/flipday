@@ -19,7 +19,7 @@ class AppContainer(app: Application) {
     private val db = FlipdayDatabase.build(app)
     val settings = SettingsStore(app)
     val scheduler = ReminderScheduler(app)
-    val repository = EventRepository(db.eventDao(), scheduler) { FlipdayWidget().updateAll(app) }
+    val repository = EventRepository(db.eventDao(), scheduler) { app.flipday.widget.ALL_WIDGETS.forEach { it.updateAll(app) } }
 
     /** Last deleted event, kept so the Events screen can offer Undo after a delete from the detail screen. */
     val pendingUndo = MutableStateFlow<Event?>(null)

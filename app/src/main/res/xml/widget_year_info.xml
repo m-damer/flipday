@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- updatePeriodMillis=0: refresh comes from the midnight and time-change receivers, not the system timer. -->
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
-    android:minWidth="110dp"
+    android:minWidth="250dp"
     android:minHeight="110dp"
-    android:targetCellWidth="2"
+    android:targetCellWidth="4"
     android:targetCellHeight="2"
-    android:minResizeWidth="110dp"
+    android:minResizeWidth="250dp"
     android:minResizeHeight="40dp"
     android:resizeMode="horizontal|vertical"
     android:updatePeriodMillis="0"
@@ -13,4 +13,4 @@
     android:configure="app.flipday.widget.WidgetConfigActivity"
     android:widgetFeatures="reconfigurable"
     android:initialLayout="@layout/glance_default_loading_layout"
-    android:description="@string/widget_desc" />
+    android:description="@string/style_year_desc" />

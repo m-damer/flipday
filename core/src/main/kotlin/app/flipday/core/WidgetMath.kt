@@ -3,6 +3,8 @@ package app.flipday.core
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
+import java.time.temporal.ChronoUnit
+import java.time.DayOfWeek
 
 /** Numbers behind the ring and live-ticker widget styles. Pure Kotlin so they run as JVM tests. */
 object WidgetMath {
@@ -31,5 +33,39 @@ object WidgetMath {
         if (!target.isAfter(now)) return null
         val r = EventCalculator.remaining(target, now)
         return Triple(r.days, r.hours, r.minutes)
+    }
+
+    /** Where the calendar year stands: week 1..52, days left after today, and the share of the year used (0..1). */
+    data class YearStatus(val year: Int, val week: Int, val weeksTotal: Int, val daysLeft: Int, val progress: Float)
+
+    fun yearProgress(today: LocalDate): YearStatus {
+        val length = today.lengthOfYear()
+        return YearStatus(today.year, ((today.dayOfYear - 1) / 7 + 1).coerceAtMost(52), 52, length - today.dayOfYear, today.dayOfYear.toFloat() / length)
+    }
+
+    /** Milestone steps for a count-up: 100, 365, 730, 1,000, then every 1,000 days. */
+    private val FIXED_MILESTONES = listOf(100L, 365L, 730L, 1000L)
+
+    data class Milestone(val target: Long, val daysLeft: Long, val shown: List<Long>)
+
+    /** The next milestone after [daysSince], how far away it is, and the three steps to show as chips. */
+    fun nextMilestone(daysSince: Long): Milestone {
+        val next = FIXED_MILESTONES.firstOrNull { it > daysSince } ?: ((daysSince / 1000) + 1) * 1000
+        val chips = if (next <= 1000) FIXED_MILESTONES.filter { it >= 365 }.take(3) else listOf(next - 1000, next, next + 1000)
+        return Milestone(next, next - daysSince, chips)
+    }
+
+    /** Days and weeks lived since the birth date. */
+    fun lived(birth: LocalDate, today: LocalDate): Pair<Long, Long> {
+        val days = ChronoUnit.DAYS.between(birth, today)
+        return days to days / 7
+    }
+
+    /** Rows of day numbers for the month of [date], padded with null. The week starts on [weekStart]. */
+    fun monthGrid(date: LocalDate, weekStart: DayOfWeek): List<List<Int?>> {
+        val first = date.withDayOfMonth(1)
+        val lead = (first.dayOfWeek.value - weekStart.value + 7) % 7
+        val cells = MutableList<Int?>(lead) { null } + (1..date.lengthOfMonth()).map<Int, Int?> { it }
+        return cells.chunked(7).map { row -> row + List(7 - row.size) { null } }
     }
 }

@@ -45,12 +45,12 @@ fun WidgetPreview(
     progress: Float = 0.92f,
 ) {
     val dark = isSystemInDarkTheme()
-    val flap = template.onCard
-    val dim = if (flap) (if (dark) Color(0xFF3A3A3D) else Color(0xFFE3E0D6)) else Color(0x33FFFFFF)
-    val arc = if (dark) Color(accent.digit) else Color(accent.bgDay)
-    val bg = if (flap) (if (dark) Color(0xFF171719) else Color.White) else Color(if (dark) accent.bgNight else accent.bgDay)
+    val flap = true
+    val dim = if (flap) (if (dark) Color(0xFF37373B) else Color(0xFFDAD6CB)) else Color(0x33FFFFFF)
+    val arc = if (dark) Color(accent.bgNight) else Color(accent.bgDay)
+    val bg = if (flap) (if (dark) Color(0xFF242427) else Color.White) else Color(if (dark) accent.bgNight else accent.bgDay)
     val ink = if (flap) (if (dark) Color(0xFFF2EFE6) else Color(0xFF1A1A1C)) else Color.White
-    val muted = if (flap) (if (dark) Color(0xFFB8B4A8) else Color(0xFF625E54)) else Color(0xFFE8F4F1)
+    val muted = if (flap) (if (dark) Color(0xFFA39F94) else Color(0xFF625E54)) else Color(0xFFE8F4F1)
     Column(
         modifier.clearAndSetSemantics { contentDescription = description }.background(bg, RoundedCornerShape(24.dp)).padding(14.dp),
         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center,

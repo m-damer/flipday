@@ -93,7 +93,7 @@ class WidgetConfigActivity : AppCompatActivity() {
                 val settings by container.settings.settings.collectAsState(initial = AppSettings())
                 val active = events.filter { it.archivedOn == null }
                 var eventId by remember { mutableLongStateOf(0L) }
-                var template by remember { mutableStateOf(WidgetDraft.template) }
+                var template by remember { mutableStateOf(providerTemplate(appWidgetId)) }
                 var accent by remember { mutableStateOf(WidgetAccent.TEAL) }
                 var showTitle by remember { mutableStateOf(true) }
                 var showUnit by remember { mutableStateOf(true) }
@@ -134,7 +134,7 @@ class WidgetConfigActivity : AppCompatActivity() {
                                 p[WidgetKeys.SHOW_TITLE] = showTitle
                                 p[WidgetKeys.SHOW_UNIT] = showUnit
                             }
-                            FlipdayWidget().update(this@WidgetConfigActivity, gid)
+                            widgetFor(this@WidgetConfigActivity, gid)?.update(this@WidgetConfigActivity, gid)
                             WidgetRefresher.scheduleTickerIfNeeded(applicationContext)
                             setResult(Activity.RESULT_OK, Intent().putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId))
                             finish()
@@ -153,10 +153,7 @@ class WidgetConfigActivity : AppCompatActivity() {
                         item { Label(stringResource(R.string.widget_style)) }
                         item {
                             Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                listOf(
-                                    WidgetTemplate.FLAP to R.string.style_flap, WidgetTemplate.PAPER to R.string.style_paper, WidgetTemplate.RING to R.string.style_ring,
-                                    WidgetTemplate.AGE to R.string.style_age, WidgetTemplate.DATE to R.string.style_date, WidgetTemplate.TICKER to R.string.style_ticker,
-                                ).forEach { (t, label) -> FilterChip(selected = template == t, onClick = { template = t }, label = { Text(stringResource(label)) }) }
+                                WidgetTemplate.entries.map { it to templateName(it) }.forEach { (t, label) -> FilterChip(selected = template == t, onClick = { template = t }, label = { Text(stringResource(label)) }) }
                             }
                         }
                         item { Label(stringResource(R.string.widget_colors)) }
@@ -181,6 +178,34 @@ class WidgetConfigActivity : AppCompatActivity() {
             }
         }
     }
+}
+
+/** The family of the launcher widget that was dropped: the receiver that owns [appWidgetId]. */
+private fun AppCompatActivity.providerTemplate(appWidgetId: Int): WidgetTemplate {
+    val cls = AppWidgetManager.getInstance(this).getAppWidgetInfo(appWidgetId)?.provider?.className ?: return WidgetDraft.template
+    return when (cls.substringAfterLast('.')) {
+        "AgeWidgetReceiver" -> WidgetTemplate.AGE; "CountUpWidgetReceiver" -> WidgetTemplate.COUNTUP
+        "AgendaWidgetReceiver" -> WidgetTemplate.AGENDA; "RingWidgetReceiver" -> WidgetTemplate.RING
+        "DateWidgetReceiver" -> WidgetTemplate.DATE; "TickerWidgetReceiver" -> WidgetTemplate.TICKER
+        "YearWidgetReceiver" -> WidgetTemplate.YEAR; else -> WidgetTemplate.BIG
+    }
+}
+
+private suspend fun widgetFor(context: android.content.Context, gid: androidx.glance.GlanceId): androidx.glance.appwidget.GlanceAppWidget? {
+    val manager = GlanceAppWidgetManager(context)
+    return ALL_WIDGETS.firstOrNull { w -> manager.getGlanceIds(w.javaClass).contains(gid) }
+}
+
+internal fun templateName(t: WidgetTemplate) = when (t) {
+    WidgetTemplate.BIG -> R.string.style_big; WidgetTemplate.AGE -> R.string.style_age; WidgetTemplate.COUNTUP -> R.string.style_countup
+    WidgetTemplate.AGENDA -> R.string.style_agenda; WidgetTemplate.RING -> R.string.style_ring; WidgetTemplate.DATE -> R.string.style_date
+    WidgetTemplate.TICKER -> R.string.style_ticker; WidgetTemplate.YEAR -> R.string.style_year
+}
+
+internal fun templateDesc(t: WidgetTemplate) = when (t) {
+    WidgetTemplate.BIG -> R.string.style_big_desc; WidgetTemplate.AGE -> R.string.style_age_desc; WidgetTemplate.COUNTUP -> R.string.style_countup_desc
+    WidgetTemplate.AGENDA -> R.string.style_agenda_desc; WidgetTemplate.RING -> R.string.style_ring_desc; WidgetTemplate.DATE -> R.string.style_date_desc
+    WidgetTemplate.TICKER -> R.string.style_ticker_desc; WidgetTemplate.YEAR -> R.string.style_year_desc
 }
 
 private fun accentName(a: WidgetAccent) = when (a) {

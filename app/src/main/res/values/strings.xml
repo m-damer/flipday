@@ -79,7 +79,6 @@
     <string name="notif_today">Today: %1$s</string>
     <string name="notif_tomorrow">Tomorrow: %1$s</string>
     <string name="notif_open">Open</string>
-    <string name="widget_desc">Days until your next event</string>
     <string name="widget_empty">Tap to add an event</string>
     <string name="widget_deleted">Event was deleted</string>
     <string name="widgets_intro">Add a Flipday widget to your home screen to see the days left for your next event.</string>
@@ -165,8 +164,6 @@
     <string name="widget_setup_title">Choose event</string>
     <string name="widget_nearest">Nearest upcoming event</string>
     <string name="widget_style">STYLE</string>
-    <string name="style_flap">Flap</string>
-    <string name="style_paper">Paper</string>
     <string name="widget_content">CONTENT</string>
     <string name="widget_colors">COLORS</string>
     <string name="widget_text">TEXT</string>
@@ -177,8 +174,6 @@
     <string name="accent_indigo">Indigo</string>
     <string name="accent_rose">Rose</string>
     <string name="accent_amber">Amber</string>
-    <string name="style_flap_desc">Split-flap tiles on a card. Follows light and dark.</string>
-    <string name="style_paper_desc">Large numerals on a colour card.</string>
     <string name="widgets_pin_unsupported">Your launcher cannot add widgets from here. Long-press the home screen and choose Flipday.</string>
     <string name="label_to_start">days to start</string>
     <string name="label_days_left">days left</string>
@@ -216,14 +211,6 @@
         <item quantity="other">The counter stops at %1$s days. The event becomes a period you can still open.</item>
     </plurals>
     <string name="mark_ended_confirm">End today</string>
-    <string name="style_ring">Ring</string>
-    <string name="style_age">Age</string>
-    <string name="style_date">Date</string>
-    <string name="style_ticker">Live ticker</string>
-    <string name="style_ring_desc">A ring shows how much of the time has passed.</string>
-    <string name="style_age_desc">Age as flap tiles, with the next birthday.</string>
-    <string name="style_date_desc">The date as a block, with the days left.</string>
-    <string name="style_ticker_desc">Days, hours and minutes. Updates about every 15 minutes and when you unlock.</string>
     <string name="ticker_days">Days</string>
     <string name="ticker_hours">Hrs</string>
     <string name="ticker_minutes">Min</string>
@@ -277,4 +264,60 @@
     <string name="share_text">%1$s: %2$s %3$s</string>
     <string name="share_chooser">Share event</string>
     <string name="share_failed">Could not create the image.</string>
+    <string name="style_big">Big number</string>
+    <string name="style_age">Age counter</string>
+    <string name="style_countup">Count-up</string>
+    <string name="style_agenda">Agenda</string>
+    <string name="style_ring">Progress ring</string>
+    <string name="style_date">Date card</string>
+    <string name="style_ticker">Live ticker</string>
+    <string name="style_year">Year progress</string>
+    <string name="style_big_desc">Flap tiles with the days left. Strip, small, medium and large.</string>
+    <string name="style_age_desc">Age as flap tiles, with the next birthday and days lived.</string>
+    <string name="style_countup_desc">Days since, with the next milestone.</string>
+    <string name="style_agenda_desc">Your next events in a list.</string>
+    <string name="style_ring_desc">A ring shows how much of the time has passed.</string>
+    <string name="style_date_desc">The date as a calendar leaf, with a month view when large.</string>
+    <string name="style_ticker_desc">Days, hours and minutes. Updates about every 15 minutes and when you unlock.</string>
+    <string name="style_year_desc">How much of this year has passed, week by week.</string>
+    <string name="wd_due_in">Due in</string>
+    <string name="wd_upcoming">Upcoming</string>
+    <string name="wd_next_up">Next up</string>
+    <string name="wd_next_milestone">Next milestone</string>
+    <string name="wd_since">since %1$s</string>
+    <string name="wd_next_line">Next: %1$s days %2$s</string>
+    <string name="wd_more">+%1$s more</string>
+    <string name="wd_due_on">Due %1$s</string>
+    <string name="wd_ticker_short">%1$sd %2$s:%3$s</string>
+    <string name="wd_year_week">%1$s · week %2$s</string>
+    <string name="wd_week_of">Week %1$s / %2$s</string>
+    <string name="wd_week_label">Week</string>
+    <string name="wd_days_left_stat">Days left</string>
+    <string name="wd_next_event">Next event</string>
+    <string name="wd_day_short">d</string>
+    <string name="wd_days_lived">%1$s days lived</string>
+    <string name="wd_weeks_lived">%1$s weeks</string>
+    <string name="wd_years">years</string>
+    <string name="wd_months">months</string>
+    <string name="wd_days">days</string>
+    <plurals name="wd_turns_in">
+        <item quantity="one">Turns %1$s in %2$s day</item>
+        <item quantity="other">Turns %1$s in %2$s days</item>
+    </plurals>
+    <plurals name="wd_in_days">
+        <item quantity="one">in %1$s day</item>
+        <item quantity="other">in %1$s days</item>
+    </plurals>
+    <plurals name="wd_n_years">
+        <item quantity="one">%1$s year</item>
+        <item quantity="other">%1$s years</item>
+    </plurals>
+    <plurals name="wd_n_months">
+        <item quantity="one">%1$s month</item>
+        <item quantity="other">%1$s months</item>
+    </plurals>
+    <plurals name="wd_n_days">
+        <item quantity="one">%1$s day</item>
+        <item quantity="other">%1$s days</item>
+    </plurals>
 </resources>

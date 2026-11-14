@@ -53,7 +53,16 @@ import androidx.compose.ui.unit.dp
 import app.flipday.DeveloperInfo
 import app.flipday.R
 import app.flipday.ui.components.FlipNumber
-import app.flipday.widget.FlipdayWidgetReceiver
+import app.flipday.widget.AgeWidgetReceiver
+import app.flipday.widget.AgendaWidgetReceiver
+import app.flipday.widget.BigNumberWidgetReceiver
+import app.flipday.widget.CountUpWidgetReceiver
+import app.flipday.widget.DateWidgetReceiver
+import app.flipday.widget.RingWidgetReceiver
+import app.flipday.widget.TickerWidgetReceiver
+import app.flipday.widget.YearWidgetReceiver
+import app.flipday.widget.templateDesc
+import app.flipday.widget.templateName
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -130,14 +139,7 @@ fun WidgetsScreen(factory: ViewModelProvider.Factory) {
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         Text(stringResource(R.string.tab_widgets), style = MaterialTheme.typography.headlineSmall)
         Text(stringResource(R.string.widgets_intro), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        listOf(
-            Triple(WidgetTemplate.FLAP, R.string.style_flap, R.string.style_flap_desc),
-            Triple(WidgetTemplate.PAPER, R.string.style_paper, R.string.style_paper_desc),
-            Triple(WidgetTemplate.RING, R.string.style_ring, R.string.style_ring_desc),
-            Triple(WidgetTemplate.AGE, R.string.style_age, R.string.style_age_desc),
-            Triple(WidgetTemplate.DATE, R.string.style_date, R.string.style_date_desc),
-            Triple(WidgetTemplate.TICKER, R.string.style_ticker, R.string.style_ticker_desc),
-        ).forEach { (template, name, desc) ->
+        WidgetTemplate.entries.map { Triple(it, templateName(it), templateDesc(it)) }.forEach { (template, name, desc) ->
             Surface(shape = MaterialTheme.shapes.large, color = MaterialTheme.colorScheme.surface, modifier = Modifier.fillMaxWidth()) {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
@@ -148,7 +150,7 @@ fun WidgetsScreen(factory: ViewModelProvider.Factory) {
                     Button(onClick = {
                         WidgetDraft.template = template
                         val manager = AppWidgetManager.getInstance(context)
-                        if (manager.isRequestPinAppWidgetSupported) manager.requestPinAppWidget(ComponentName(context, FlipdayWidgetReceiver::class.java), null, null)
+                        if (manager.isRequestPinAppWidgetSupported) manager.requestPinAppWidget(ComponentName(context, receiverFor(template)), null, null)
                         else unsupported = true
                     }) { Text(stringResource(R.string.widget_add)) }
                 }
@@ -156,6 +158,13 @@ fun WidgetsScreen(factory: ViewModelProvider.Factory) {
         }
         if (unsupported) Text(stringResource(R.string.widgets_pin_unsupported), color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium)
     }
+}
+
+private fun receiverFor(t: WidgetTemplate): Class<*> = when (t) {
+    WidgetTemplate.BIG -> BigNumberWidgetReceiver::class.java; WidgetTemplate.AGE -> AgeWidgetReceiver::class.java
+    WidgetTemplate.COUNTUP -> CountUpWidgetReceiver::class.java; WidgetTemplate.AGENDA -> AgendaWidgetReceiver::class.java
+    WidgetTemplate.RING -> RingWidgetReceiver::class.java; WidgetTemplate.DATE -> DateWidgetReceiver::class.java
+    WidgetTemplate.TICKER -> TickerWidgetReceiver::class.java; WidgetTemplate.YEAR -> YearWidgetReceiver::class.java
 }
 
 private fun rateApp(context: Context) {

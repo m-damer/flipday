@@ -15,28 +15,32 @@ object WidgetKeys {
 }
 
 /**
- * FLAP: flap tiles on a card. PAPER: colour card with plain numerals. RING: progress ring around the count.
- * AGE: age with a "turns" line. DATE: the target date as a block. TICKER: days, hours and minutes (refreshed about every 15 minutes).
- * Every style except PAPER sits on the neutral card and follows light and dark.
+ * The eight widget families of the design (board 06, widgets). Each one is also its own launcher widget, so the
+ * launcher picker lists them by name. Older saved values map to the nearest family: FLAP and PAPER became [BIG].
  */
-enum class WidgetTemplate { FLAP, PAPER, RING, AGE, DATE, TICKER;
-    val onCard: Boolean get() = this != PAPER
+enum class WidgetTemplate(val hasSmall: Boolean) {
+    BIG(true), AGE(true), COUNTUP(true), AGENDA(false), RING(true), DATE(true), TICKER(false), YEAR(false);
 
-    companion object { fun parse(s: String?): WidgetTemplate = entries.firstOrNull { it.name == s } ?: FLAP }
+    companion object {
+        fun parse(s: String?): WidgetTemplate = when (s) {
+            null, "FLAP", "PAPER" -> BIG
+            else -> entries.firstOrNull { it.name == s } ?: BIG
+        }
+    }
 }
 
-/**
- * Widget colour choices (studio, Colors tab). [bg] is the PAPER card (day, night); [digit] is the flap digit colour.
- * All pairs keep white text above 4.5:1 on [bgDay].
- */
+/** Widget size classes: strip 4x1, small 2x2, medium 4x2, large 4x4 launcher cells. */
+enum class WidgetSize { STRIP, SMALL, MEDIUM, LARGE }
+
+/** Accent colours for the flap digits and highlights. Teal is the brand colour; the others are studio choices. */
 enum class WidgetAccent(val bgDay: Long, val bgNight: Long, val digit: Long) {
-    TEAL(0xFF0F766E, 0xFF0B4F49, 0xFF5EE0C4),
-    INDIGO(0xFF3730A3, 0xFF2B2670, 0xFFC7D2FE),
-    ROSE(0xFFBE123C, 0xFF7F1230, 0xFFFECDD3),
-    AMBER(0xFFB45309, 0xFF7A3A06, 0xFFFDE68A);
+    TEAL(0xFF0F766E, 0xFF4FD1B5, 0xFF5EE0C4),
+    INDIGO(0xFF3730A3, 0xFFA5B4FC, 0xFFC7D2FE),
+    ROSE(0xFFBE123C, 0xFFFDA4AF, 0xFFFECDD3),
+    AMBER(0xFFB45309, 0xFFFCD34D, 0xFFFDE68A);
 
     companion object { fun parse(s: String?): WidgetAccent = entries.firstOrNull { it.name == s } ?: TEAL }
 }
 
-/** Style picked in the gallery, used as the starting style of the next widget that gets set up. */
-object WidgetDraft { @Volatile var template: WidgetTemplate = WidgetTemplate.FLAP }
+/** Family picked in the gallery, used as the starting family of the next widget that gets set up. */
+object WidgetDraft { @Volatile var template: WidgetTemplate = WidgetTemplate.BIG }

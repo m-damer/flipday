@@ -34,10 +34,12 @@ object WidgetRefresher {
     /** Live-ticker widgets show minutes, so they refresh about every 15 minutes (inexact alarm, no exact-alarm permission). */
     suspend fun scheduleTickerIfNeeded(context: Context) {
         val manager = GlanceAppWidgetManager(context)
-        val any = manager.getGlanceIds(FlipdayWidget::class.java).any { id ->
-            runCatching { WidgetTemplate.parse(getAppWidgetState(context, PreferencesGlanceStateDefinition, id)[WidgetKeys.TEMPLATE]) }
-                .getOrNull() == WidgetTemplate.TICKER
-        }
+        val any = manager.getGlanceIds(TickerWidget::class.java).isNotEmpty() ||
+            ALL_WIDGETS.filter { it !is TickerWidget }.any { w ->
+                manager.getGlanceIds(w.javaClass).any { id ->
+                    runCatching { getAppWidgetState(context, PreferencesGlanceStateDefinition, id)[WidgetKeys.TEMPLATE] }.getOrNull() == WidgetTemplate.TICKER.name
+                }
+            }
         val alarms = context.getSystemService(AlarmManager::class.java)
         val pending = PendingIntent.getBroadcast(
             context, 1, Intent(context, WidgetRefreshReceiver::class.java).setAction(ACTION_TICKER),
@@ -59,7 +61,7 @@ class WidgetRefreshReceiver : BroadcastReceiver() {
         val app = context.applicationContext
         CoroutineScope(Dispatchers.Default).launch {
             try {
-                FlipdayWidget().updateAll(app)
+                ALL_WIDGETS.forEach { it.updateAll(app) }
                 WidgetRefresher.scheduleNext(app)
                 WidgetRefresher.scheduleTickerIfNeeded(app)
             } finally { pending.finish() }

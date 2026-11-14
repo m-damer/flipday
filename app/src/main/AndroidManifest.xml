@@ -59,11 +59,53 @@
             </intent-filter>
         </activity>
 
-        <receiver android:name=".widget.FlipdayWidgetReceiver" android:exported="true">
+        <receiver android:name=".widget.BigNumberWidgetReceiver" android:exported="true" android:label="@string/style_big">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
-            <meta-data android:name="android.appwidget.provider" android:resource="@xml/flipday_widget_info" />
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_big_info" />
+        </receiver>
+        <receiver android:name=".widget.AgeWidgetReceiver" android:exported="true" android:label="@string/style_age">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_age_info" />
+        </receiver>
+        <receiver android:name=".widget.CountUpWidgetReceiver" android:exported="true" android:label="@string/style_countup">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_countup_info" />
+        </receiver>
+        <receiver android:name=".widget.AgendaWidgetReceiver" android:exported="true" android:label="@string/style_agenda">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_agenda_info" />
+        </receiver>
+        <receiver android:name=".widget.RingWidgetReceiver" android:exported="true" android:label="@string/style_ring">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_ring_info" />
+        </receiver>
+        <receiver android:name=".widget.DateWidgetReceiver" android:exported="true" android:label="@string/style_date">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_date_info" />
+        </receiver>
+        <receiver android:name=".widget.TickerWidgetReceiver" android:exported="true" android:label="@string/style_ticker">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_ticker_info" />
+        </receiver>
+        <receiver android:name=".widget.YearWidgetReceiver" android:exported="true" android:label="@string/style_year">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_year_info" />
         </receiver>
 
         <!-- Keeps the per-app language choice on Android 12 and lower (AppCompat). -->

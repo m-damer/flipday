@@ -244,7 +244,7 @@ private fun LivePreview(draft: Draft, appWidgetId: Int, size: WidgetSize) {
     LaunchedEffect(prefs, size, draft.photoVersion, events, appSettings) {
         val locale = context.resources.configuration.locales[0]
         views = runCatching {
-            androidx.glance.appwidget.GlanceRemoteViews().compose(context = context, size = d, appWidgetId = appWidgetId, state = prefs) {
+            androidx.glance.appwidget.GlanceRemoteViews().compose(context = context, size = d, state = prefs) {
                 WidgetBody(context, appWidgetId, events.filter { it.archivedOn == null }, appSettings.numerals, locale, WidgetTemplate.BIG, prefs)
             }.remoteViews
         }.getOrNull()

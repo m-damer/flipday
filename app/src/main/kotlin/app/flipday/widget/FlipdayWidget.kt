@@ -59,10 +59,6 @@ abstract class FlipdayWidget(private val defaultTemplate: WidgetTemplate) : Glan
         }
     }
 
-    private fun configureAction(context: Context, appWidgetId: Int): Action = actionStartActivity(
-        Intent(context, WidgetConfigActivity::class.java)
-            .putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId).setData(Uri.parse("flipday://widget/$appWidgetId")),
-    )
 }
 
 class BigNumberWidget : FlipdayWidget(WidgetTemplate.BIG)
@@ -152,3 +148,8 @@ internal fun WidgetBody(
             }
         }
 }
+
+private fun configureAction(context: Context, appWidgetId: Int): Action = actionStartActivity(
+    Intent(context, WidgetConfigActivity::class.java)
+        .putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId).setData(Uri.parse("flipday://widget/$appWidgetId")),
+)

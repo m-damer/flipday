@@ -51,6 +51,7 @@ import androidx.compose.ui.unit.dp
 import app.flipday.DeveloperInfo
 import app.flipday.R
 import app.flipday.ui.components.FlipNumber
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.material3.FilterChip
 import androidx.compose.ui.semantics.heading

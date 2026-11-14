@@ -50,7 +50,8 @@ internal fun LiveWidgetPreview(prefs: Preferences, size: WidgetSize, events: Lis
     }
     AndroidView(
         factory = { FrameLayout(it) },
-        update = { frame -> views?.let { rv -> frame.removeAllViews(); frame.addView(rv.apply(frame.context, frame)) } },
+        update = { frame -> views?.let { rv -> frame.removeAllViews(); // Application context on purpose: an activity's inflater swaps ImageView for AppCompatImageView, which RemoteViews refuses (setImageResource).
+            frame.addView(rv.apply(frame.context.applicationContext, frame)) } },
         modifier = Modifier.size(d.width, d.height).clip(MaterialTheme.shapes.large),
     )
 }

@@ -47,3 +47,17 @@ Also missing: Strip 4x1 size (no `targetCellHeight`/min height for 1 row), the l
 5. Milestone settings for count-up (which milestones: 100, 365, 730, 1,000).
 6. Share card for count-up and period events.
 7. Revised Settings after removing Week start (06C).
+
+## Status after the 2026-11-14 pass (nothing verified on a device yet)
+Done in code, CI green: all Material colour roles, FAB and bar; 8 widget families with 4 sizes, studio (Template, Colours, Text, Content), in-app gallery with live previews; first-run onboarding with language switch; event row icon tile, progress and plate edge; detail hero per type and phase (days/hours/minutes, age with turns-in and days lived, count-up with milestone, period ongoing and ended, event day, completed with Keep counting up); empty-state suggestion chips; "Remind me tomorrow" notification action; Exact reminders row in Settings.
+
+Known deviations from the design:
+- Detail HRS and MIN tiles show the exact time left, not days x 24. DAYS stays the calendar count so it matches the list and widgets.
+- Ticker widget refreshes about every 15 minutes (inexact alarm), the design board 06E says the same; the older 13-direction board says once a minute.
+- Week start row removed from Settings; board 06C still shows it and needs updating.
+- Launcher picker has no preview images (previewLayout not set).
+- Progress bars use Material's linear indicator, not the segmented bar.
+- Event-day screen reuses the detail layout (EVENT DAY eyebrow plus message) rather than a separate full-screen design.
+
+Still needs design before building: widget empty/loading/needs-setup states for the new families, period widget layout, studio on tablet and landscape, share card variants for count-up and period, Settings board 06C refresh.
+Needs a device: RTL tile order, corner clipping, TalkBack and 200% font, phone and tablet layouts.

@@ -66,7 +66,7 @@ internal fun paletteFor(style: WidgetStyle): Palette = when {
     style.onMedia -> MediaPalette
     style.dynamic && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
         val t = GlanceTheme.colors
-        Palette(t.surface, t.onSurface, t.onSurfaceVariant, t.outlineVariant, t.secondaryContainer, t.onSecondaryContainer)
+        Palette(t.surface, t.onSurface, t.onSurfaceVariant, t.surfaceVariant, t.secondaryContainer, t.onSecondaryContainer)
     }
     else -> StaticPalette
 }

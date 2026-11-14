@@ -38,6 +38,17 @@ import app.flipday.core.EventSort
 import app.flipday.core.EventType
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.res.painterResource
+import app.flipday.core.WidgetMath
+import androidx.compose.material3.SuggestionChip
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -65,7 +76,7 @@ import java.time.format.FormatStyle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EventsScreen(factory: ViewModelProvider.Factory, onOpen: (Long) -> Unit, onSearch: () -> Unit, onArchive: () -> Unit, selectedId: Long? = null) {
+fun EventsScreen(factory: ViewModelProvider.Factory, onOpen: (Long) -> Unit, onSearch: () -> Unit, onArchive: () -> Unit, selectedId: Long? = null, onPreset: (String) -> Unit = {}) {
     val vm: EventsViewModel = viewModel(factory = factory)
     val settingsVm: SettingsViewModel = viewModel(factory = factory)
     val events by vm.events.collectAsState()
@@ -105,7 +116,7 @@ fun EventsScreen(factory: ViewModelProvider.Factory, onOpen: (Long) -> Unit, onS
         val list = events
         when {
             list == null -> Unit
-            list.isEmpty() -> EmptyState()
+            list.isEmpty() -> EmptyState(onPreset)
             else -> LazyColumn(contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 items(list, key = { it.id }) { EventRow(it, today, settings.numerals, locale.toLanguageTag(), onClick = { onOpen(it.id) }, selected = it.id == selectedId) }
             }
@@ -147,12 +158,20 @@ private fun SortFilterSheet(query: EventQuery, onDismiss: () -> Unit, onApply: (
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun EmptyState() {
+private fun EmptyState(onPreset: (String) -> Unit) {
     Column(Modifier.fillMaxSize().padding(32.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+        FlipNumber("00", stringResource(R.string.empty_title), tileHeight = 64.dp)
+        Spacer(Modifier.height(20.dp))
         Text(stringResource(R.string.empty_title), style = MaterialTheme.typography.titleLarge)
         Spacer(Modifier.height(8.dp))
-        Text(stringResource(R.string.empty_body), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(stringResource(R.string.empty_body), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
+        Spacer(Modifier.height(20.dp))
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            listOf("birthday" to R.string.chip_birthday, "trip" to R.string.chip_trip, "baby" to R.string.chip_baby, "anniversary" to R.string.chip_anniversary, "exam" to R.string.chip_exam, "newyear" to R.string.chip_new_year)
+                .forEach { (key, label) -> SuggestionChip(onClick = { onPreset(key) }, label = { Text(stringResource(label)) }) }
+        }
     }
 }
 
@@ -173,10 +192,21 @@ internal fun EventRow(event: Event, today: LocalDate, numerals: NumeralMode, tag
         color = if (selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface,
         border = if (selected) androidx.compose.foundation.BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
     ) {
-        Row(Modifier.padding(horizontal = 16.dp, vertical = 14.dp), verticalAlignment = Alignment.CenterVertically) {
+        val progress = WidgetMath.ringProgress(event, today).takeIf { event.type != EventType.COUNTUP && it > 0f }
+        val edge = MaterialTheme.colorScheme.outlineVariant
+        Row(
+            Modifier.drawBehind { drawRect(edge, topLeft = androidx.compose.ui.geometry.Offset(0f, size.height - 3.dp.toPx()), size = androidx.compose.ui.geometry.Size(size.width, 3.dp.toPx())) }
+                .padding(start = 16.dp, end = 16.dp, top = 14.dp, bottom = 17.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box(Modifier.size(38.dp).background(MaterialTheme.colorScheme.primaryContainer, MaterialTheme.shapes.small), contentAlignment = Alignment.Center) {
+                Icon(painterResource(typeIcon(event.type)), contentDescription = null, tint = MaterialTheme.colorScheme.onPrimaryContainer, modifier = Modifier.size(22.dp))
+            }
+            Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
                 Text(event.title, style = MaterialTheme.typography.titleMedium)
                 Text(shownDate, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                if (progress != null) LinearProgressIndicator(progress = { progress }, modifier = Modifier.padding(top = 6.dp).fillMaxWidth(0.8f).height(4.dp))
             }
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 FlipNumber(digits, description, tileHeight = 36.dp)
@@ -184,4 +214,11 @@ internal fun EventRow(event: Event, today: LocalDate, numerals: NumeralMode, tag
             }
         }
     }
+}
+
+private fun typeIcon(type: EventType): Int = when (type) {
+    EventType.COUNTDOWN -> R.drawable.ic_type_countdown
+    EventType.AGE -> R.drawable.ic_type_age
+    EventType.COUNTUP -> R.drawable.ic_type_countup
+    EventType.PERIOD -> R.drawable.ic_type_period
 }

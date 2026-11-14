@@ -77,7 +77,7 @@ private val PeriodReminderPresets = listOf(0, 1, 7)
 /** Add (eventId == null) and edit share one form, as in the design ("Same form with Delete"). */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditorScreen(factory: ViewModelProvider.Factory, eventId: Long?, onClose: () -> Unit) {
+fun EditorScreen(factory: ViewModelProvider.Factory, eventId: Long?, onClose: () -> Unit, preset: String? = null) {
     val vm: EditorViewModel = viewModel(factory = factory)
     val settingsVm: SettingsViewModel = viewModel(factory = factory)
     val settings by settingsVm.settings.collectAsState()
@@ -107,7 +107,22 @@ fun EditorScreen(factory: ViewModelProvider.Factory, eventId: Long?, onClose: ()
         pendingEvent?.let { vm.save(it, onClose) }
     }
 
-    LaunchedEffect(eventId) {
+    // Suggestion chips on the empty state start a new event with a type, a title and, for the new year, the date.
+    val presetTitle = when (preset) {
+        "birthday" -> context.getString(R.string.chip_birthday); "trip" -> context.getString(R.string.chip_trip)
+        "baby" -> context.getString(R.string.chip_baby); "anniversary" -> context.getString(R.string.chip_anniversary)
+        "exam" -> context.getString(R.string.chip_exam); "newyear" -> context.getString(R.string.chip_new_year)
+        else -> null
+    }
+    LaunchedEffect(eventId, preset) {
+        if (eventId == null && presetTitle != null) {
+            title = presetTitle
+            when (preset) {
+                "birthday" -> { type = EventType.AGE; date = today.minusYears(1) }
+                "anniversary" -> { type = EventType.COUNTUP; date = today }
+                "newyear" -> date = LocalDate.of(today.year + 1, 1, 1)
+            }
+        }
         if (eventId != null) vm.load(eventId)?.let { e ->
             original = e; type = e.type; title = e.title; date = e.date; endDate = e.endDate ?: e.date.plusDays(7); time = e.time
             reminderDays = e.reminders.map { it.daysBefore }.toSet(); repeatYearly = e.repeatYearly

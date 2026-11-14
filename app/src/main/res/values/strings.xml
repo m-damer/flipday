@@ -385,4 +385,15 @@
     <string name="unit_mth">MTH</string>
     <string name="unit_lived">DAYS LIVED</string>
     <string name="action_widget">Widget</string>
+    <string name="chip_birthday">Birthday</string>
+    <string name="chip_trip">Trip</string>
+    <string name="chip_baby">Baby</string>
+    <string name="chip_anniversary">Anniversary</string>
+    <string name="chip_exam">Exam</string>
+    <string name="chip_new_year">New year</string>
+    <string name="onboarding_title">Every day that matters, counted.</string>
+    <string name="onboarding_body">Count down to what is coming. Count up from what has passed. Keep it on your home screen.</string>
+    <string name="onboarding_start">Get started</string>
+    <string name="onboarding_trip">Trip to Istanbul</string>
+    <string name="onboarding_due">Baby Noor’s due date</string>
 </resources>

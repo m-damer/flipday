@@ -457,4 +457,15 @@
     <string name="unit_mth">أشهر</string>
     <string name="unit_lived">أيام العمر</string>
     <string name="action_widget">ويدجت</string>
+    <string name="chip_birthday">عيد ميلاد</string>
+    <string name="chip_trip">رحلة</string>
+    <string name="chip_baby">مولود</string>
+    <string name="chip_anniversary">ذكرى سنوية</string>
+    <string name="chip_exam">امتحان</string>
+    <string name="chip_new_year">رأس السنة</string>
+    <string name="onboarding_title">كل يوم مهم، يُحسب.</string>
+    <string name="onboarding_body">عدّ تنازلي لما هو قادم، وتصاعدي لما مضى. وأبقِه على شاشتك الرئيسية.</string>
+    <string name="onboarding_start">ابدأ الآن</string>
+    <string name="onboarding_trip">رحلة إسطنبول</string>
+    <string name="onboarding_due">موعد ولادة نور</string>
 </resources>

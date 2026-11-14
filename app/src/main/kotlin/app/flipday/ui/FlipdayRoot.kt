@@ -77,6 +77,9 @@ private val tabs = listOf(
  */
 @Composable
 fun FlipdayRoot(factory: ViewModelProvider.Factory, openEventId: Long? = null, onOpened: () -> Unit = {}) {
+    val settingsVm: SettingsViewModel = viewModel(factory = factory)
+    val appSettings by settingsVm.settings.collectAsState()
+    if (!appSettings.onboarded) { OnboardingScreen(appSettings.numerals, onStart = { settingsVm.markOnboarded() }); return }
     val nav = rememberNavController()
     val widthDp = LocalConfiguration.current.screenWidthDp
     val useRail = widthDp >= 600
@@ -148,7 +151,7 @@ fun FlipdayRoot(factory: ViewModelProvider.Factory, openEventId: Long? = null, o
             composable(Routes.EVENTS) {
                 if (twoPane) Row(Modifier.fillMaxSize()) {
                     Box(Modifier.weight(0.4f)) {
-                        EventsScreen(factory, onOpen = { selectedEvent = it }, onSearch = { nav.navigate(Routes.SEARCH) }, onArchive = { nav.navigate(Routes.ARCHIVE) }, selectedId = selectedEvent)
+                        EventsScreen(factory, onOpen = { selectedEvent = it }, onSearch = { nav.navigate(Routes.SEARCH) }, onArchive = { nav.navigate(Routes.ARCHIVE) }, selectedId = selectedEvent, onPreset = { nav.navigate("${Routes.ADD}?preset=$it") })
                     }
                     VerticalDivider()
                     Box(Modifier.weight(0.6f)) {
@@ -158,7 +161,7 @@ fun FlipdayRoot(factory: ViewModelProvider.Factory, openEventId: Long? = null, o
                             onOpenEvent = { n -> selectedEvent = n }, showBack = false, onWidget = { nav.navigate(Routes.WIDGETS) },
                         )
                     }
-                } else EventsScreen(factory, onOpen = { nav.navigate("detail/$it") }, onSearch = { nav.navigate(Routes.SEARCH) }, onArchive = { nav.navigate(Routes.ARCHIVE) })
+                } else EventsScreen(factory, onOpen = { nav.navigate("detail/$it") }, onSearch = { nav.navigate(Routes.SEARCH) }, onArchive = { nav.navigate(Routes.ARCHIVE) }, onPreset = { nav.navigate("${Routes.ADD}?preset=$it") })
             }
             composable(Routes.WIDGETS) { WidgetsScreen(factory) }
             composable(Routes.SETTINGS) { SettingsScreen(factory, onAbout = { nav.navigate(Routes.ABOUT) }, onBackup = { nav.navigate(Routes.BACKUP) }) }
@@ -168,7 +171,9 @@ fun FlipdayRoot(factory: ViewModelProvider.Factory, openEventId: Long? = null, o
                     nav.navigate(Routes.SETTINGS) { popUpTo(nav.graph.findStartDestination().id) { saveState = true }; launchSingleTop = true; restoreState = true }
                 })
             }
-            composable(Routes.ADD) { EditorScreen(factory, eventId = null, onClose = { nav.popBackStack() }) }
+            composable("${Routes.ADD}?preset={preset}", arguments = listOf(navArgument("preset") { type = NavType.StringType; nullable = true; defaultValue = null })) {
+                EditorScreen(factory, eventId = null, onClose = { nav.popBackStack() }, preset = it.arguments?.getString("preset"))
+            }
             composable(Routes.EDIT, arguments = listOf(navArgument("id") { type = NavType.LongType })) {
                 EditorScreen(factory, eventId = it.arguments?.getLong("id"), onClose = { nav.popBackStack() })
             }

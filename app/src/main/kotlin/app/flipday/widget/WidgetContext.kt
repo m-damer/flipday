@@ -24,7 +24,7 @@ import java.util.Locale
 /** Everything a widget layout needs besides the event itself: today, formatting, strings, and the other upcoming events. */
 internal class WCtx(
     val context: Context, val today: LocalDate, val now: LocalDateTime, val numerals: NumeralMode,
-    val locale: Locale, val tag: String, val others: List<Event>,
+    val locale: Locale, val tag: String, val others: List<Event>, val timeMode: TimeMode = TimeMode.DAYS,
 ) {
     fun n(v: Any) = NumeralFormatter.format(v.toString(), numerals, tag)
     /** Digits for flap tiles, at least two. */
@@ -42,7 +42,12 @@ internal class WCtx(
     val weekStart: DayOfWeek get() = WeekFields.of(locale).firstDayOfWeek
 
     /** The number and unit a countdown shows: days to go, years old, days since. */
-    fun head(e: Event): Pair<Long, String> { val (v, u) = headline(e, today); return v to context.getString(u) }
+    fun head(e: Event): Pair<Long, String> {
+        val (v, u) = headline(e, today)
+        // "Weeks" only applies to counts of days; a birthday stays in years, and under a week stays in days.
+        return if (timeMode == TimeMode.WEEKS && e.type != EventType.AGE && v >= 7) (v / 7) to context.getString(R.string.wd_weeks_unit)
+        else v to context.getString(u)
+    }
     fun percent(p: Float) = n("${(p * 100).toInt()}%")
     fun other(i: Int): Event? = others.getOrNull(i)
 }

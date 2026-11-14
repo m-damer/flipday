@@ -1,6 +1,7 @@
 package app.flipday.widget
 
 import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 
@@ -12,6 +13,15 @@ object WidgetKeys {
     val ACCENT = stringPreferencesKey("accent")
     val SHOW_TITLE = booleanPreferencesKey("show_title")
     val SHOW_UNIT = booleanPreferencesKey("show_unit")
+    val SHOW_DATE = booleanPreferencesKey("show_date")
+    val SHOW_PROGRESS = booleanPreferencesKey("show_progress")
+    val DYNAMIC = booleanPreferencesKey("dynamic")
+    val BG_MODE = stringPreferencesKey("bg_mode")
+    val RADIUS = intPreferencesKey("radius")
+    val NUMBER_SIZE = stringPreferencesKey("number_size")
+    val FONT = stringPreferencesKey("font")
+    val NUMERALS = stringPreferencesKey("numerals")
+    val TIME_MODE = stringPreferencesKey("time_mode")
 }
 
 /**

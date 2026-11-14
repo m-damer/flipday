@@ -50,10 +50,15 @@ private val OnDarkMuted = ColorProvider(Color(0xFFA39F94))
 
 @Composable
 internal fun Frame(open: Action, dark: Boolean = false, pad: Dp = 12.dp, content: @Composable () -> Unit) {
-    Box(
-        GlanceModifier.fillMaxSize().appWidgetBackground().background(if (dark) TileBg else Card).cornerRadius(16.dp).padding(pad).clickable(open),
-        contentAlignment = Alignment.Center,
-    ) { content() }
+    val st = LocalStyle.current
+    var m = GlanceModifier.fillMaxSize().appWidgetBackground()
+    m = when {
+        dark -> m.background(TileBg)
+        st.bg == BgMode.CLEAR -> m
+        st.bgImage != null -> m.background(ImageProvider(st.bgImage), androidx.glance.layout.ContentScale.Crop)
+        else -> m.background(Card)
+    }
+    Box(m.cornerRadius(st.radiusDp.dp).padding(pad).clickable(open), contentAlignment = Alignment.Center) { content() }
 }
 
 @Composable
@@ -73,7 +78,7 @@ private fun ListRow(c: WCtx, e: Event, look: Look, withBar: Boolean = false) {
     val (v, _) = c.head(e)
     Column(GlanceModifier.fillMaxWidth().padding(vertical = 3.dp)) {
         Row(GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Column(GlanceModifier.defaultWeight()) { Title(e.title, 12); if (withBar) Sub(c.dateShort(e.date), 10) }
+            Column(GlanceModifier.defaultWeight()) { Title(e.title, 12); if (withBar) DateSub(c.dateShort(e.date), 10) }
             Tiles(c.tiles(v), 18.dp, look.accent, 2.dp)
         }
     }
@@ -86,6 +91,22 @@ private fun Others(c: WCtx, look: Look, max: Int) {
 
 // ---------------------------------------------------------------- Big number
 
+/** The count as one group of tiles, or as years, months and days when the studio's "Y\u00b7M\u00b7D" is on. */
+@Composable
+private fun BigTiles(c: WCtx, e: Event, digits: String, h: Dp, look: Look) {
+    val ymd = if (LocalStyle.current.timeMode == TimeMode.YMD) when {
+        e.type == EventType.COUNTDOWN && e.date.isAfter(c.today) -> Period.between(c.today, e.date)
+        (e.type == EventType.COUNTUP || e.type == EventType.PERIOD) && !e.date.isAfter(c.today) -> Period.between(e.date, c.today)
+        else -> null
+    } else null
+    if (ymd == null) Tiles(digits, h, look.accent) else Row(verticalAlignment = Alignment.Bottom) {
+        listOf(ymd.years to R.string.wd_years, ymd.months to R.string.wd_months, ymd.days to R.string.wd_days).forEachIndexed { i, (v, label) ->
+            if (i > 0) Gap(4.dp)
+            Column(horizontalAlignment = Alignment.CenterHorizontally) { Tiles(c.tiles(v.toLong()), h * 0.5f, look.accent, 2.dp); Sub(c.s(label), 8) }
+        }
+    }
+}
+
 @Composable
 internal fun BigLayout(c: WCtx, e: Event, look: Look, size: WidgetSize, open: Action) {
     val (v, unit) = c.head(e)
@@ -97,7 +118,7 @@ internal fun BigLayout(c: WCtx, e: Event, look: Look, size: WidgetSize, open: Ac
                 Icon(e, look); Gap(8.dp)
                 Column(GlanceModifier.defaultWeight()) {
                     if (look.showTitle) Title(e.title, 13)
-                    Sub(c.dateLong(e.date), 10)
+                    DateSub(c.dateLong(e.date), 10)
                     Bar(progress, look.accent, GlanceModifier.fillMaxWidth())
                 }
                 Gap(8.dp)
@@ -105,7 +126,7 @@ internal fun BigLayout(c: WCtx, e: Event, look: Look, size: WidgetSize, open: Ac
             }
             WidgetSize.SMALL -> Column(GlanceModifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalAlignment = Alignment.CenterVertically) {
                 if (e.type == EventType.COUNTDOWN) Label(c.s(R.string.wd_due_in), look.accent)
-                VGap(4.dp); Tiles(digits, 52.dp, look.accent); VGap(4.dp)
+                VGap(4.dp); BigTiles(c, e, digits, 52.dp, look); VGap(4.dp)
                 Sub(listOfNotNull(e.title.takeIf { look.showTitle }, unit.takeIf { look.showUnit }).joinToString(" · "), 11)
             }
             WidgetSize.MEDIUM -> Column(GlanceModifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically) {
@@ -113,16 +134,16 @@ internal fun BigLayout(c: WCtx, e: Event, look: Look, size: WidgetSize, open: Ac
                     Column(GlanceModifier.defaultWeight()) {
                         Label(c.s(R.string.wd_upcoming), look.accent)
                         if (look.showTitle) Title(e.title, 15, 2)
-                        Sub(c.dateLong(e.date), 11)
+                        DateSub(c.dateLong(e.date), 11)
                     }
-                    Tiles(digits, 56.dp, look.accent)
+                    BigTiles(c, e, digits, 56.dp, look)
                 }
                 Bar(progress, look.accent, GlanceModifier.fillMaxWidth())
             }
             WidgetSize.LARGE -> Column(GlanceModifier.fillMaxSize()) {
                 Label("${c.s(R.string.wd_upcoming)} · ${c.dayMonth(c.today)}", look.accent)
                 if (look.showTitle) Title(e.title, 17)
-                Box(GlanceModifier.fillMaxWidth().padding(vertical = 8.dp), contentAlignment = Alignment.Center) { Tiles(digits, 84.dp, look.accent) }
+                Box(GlanceModifier.fillMaxWidth().padding(vertical = 8.dp), contentAlignment = Alignment.Center) { BigTiles(c, e, digits, 84.dp, look) }
                 Bar(progress, look.accent, GlanceModifier.fillMaxWidth())
                 VGap(8.dp); Others(c, look, 3)
             }
@@ -279,7 +300,7 @@ internal fun AgendaLayout(c: WCtx, e: Event, look: Look, size: WidgetSize, open:
                     Column(GlanceModifier.fillMaxWidth().padding(vertical = 3.dp)) {
                         Row(GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                             Icon(r, look, 16.dp, Muted); Gap(8.dp)
-                            Column(GlanceModifier.defaultWeight()) { Title(r.title, 13); Sub(c.dateShort(r.date), 10) }
+                            Column(GlanceModifier.defaultWeight()) { Title(r.title, 13); DateSub(c.dateShort(r.date), 10) }
                             Text("${c.n(v)} $u", maxLines = 1, style = TextStyle(color = Ink, fontSize = 12.sp, fontWeight = FontWeight.Bold))
                         }
                         if (size == WidgetSize.LARGE) Bar(WidgetMath.ringProgress(r, c.today), look.accent, GlanceModifier.fillMaxWidth())
@@ -326,7 +347,7 @@ internal fun RingLayout(c: WCtx, e: Event, look: Look, size: WidgetSize, open: A
         when (size) {
             WidgetSize.STRIP -> Row(GlanceModifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically) {
                 Ring(c, look, progress, 40f, 16.dp, digits, null); Gap(8.dp)
-                Column(GlanceModifier.defaultWeight()) { if (look.showTitle) Title(e.title, 13); Sub(c.dateLong(e.date), 10) }
+                Column(GlanceModifier.defaultWeight()) { if (look.showTitle) Title(e.title, 13); DateSub(c.dateLong(e.date), 10) }
                 Text(c.percent(progress), style = TextStyle(color = Ink, fontSize = 13.sp, fontWeight = FontWeight.Bold))
             }
             WidgetSize.SMALL -> Column(GlanceModifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalAlignment = Alignment.CenterVertically) {
@@ -338,7 +359,7 @@ internal fun RingLayout(c: WCtx, e: Event, look: Look, size: WidgetSize, open: A
                 Column(GlanceModifier.defaultWeight()) {
                     Label(c.s(R.string.wd_upcoming), look.accent)
                     if (look.showTitle) Title(e.title, 15, 2)
-                    Sub(c.dateLong(e.date), 11); Sub(c.percent(progress), 11)
+                    DateSub(c.dateLong(e.date), 11); Sub(c.percent(progress), 11)
                 }
             }
             WidgetSize.LARGE -> Column(GlanceModifier.fillMaxSize()) {
@@ -347,7 +368,7 @@ internal fun RingLayout(c: WCtx, e: Event, look: Look, size: WidgetSize, open: A
                     Column(GlanceModifier.defaultWeight()) {
                         Label(c.s(R.string.wd_upcoming), look.accent)
                         if (look.showTitle) Title(e.title, 16, 2)
-                        Sub(c.dateLong(e.date), 11); Sub(c.percent(progress), 11)
+                        DateSub(c.dateLong(e.date), 11); Sub(c.percent(progress), 11)
                     }
                 }
                 VGap(10.dp); Others(c, look, 4)
@@ -383,7 +404,7 @@ internal fun DateLayout(c: WCtx, e: Event, look: Look, size: WidgetSize, open: A
                     Text("${c.month(anchor)} ${c.n(anchor.dayOfMonth)}", maxLines = 1, style = TextStyle(color = ColorProvider(Color.White), fontSize = 12.sp, fontWeight = FontWeight.Bold))
                 }
                 Gap(10.dp)
-                Column(GlanceModifier.defaultWeight()) { if (look.showTitle) Title(e.title, 13); Sub(c.dateLong(anchor), 10) }
+                Column(GlanceModifier.defaultWeight()) { if (look.showTitle) Title(e.title, 13); DateSub(c.dateLong(anchor), 10) }
                 Text(daysText, maxLines = 1, style = TextStyle(color = Ink, fontSize = 12.sp, fontWeight = FontWeight.Bold))
             }
             WidgetSize.SMALL -> Column(GlanceModifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalAlignment = Alignment.CenterVertically) {

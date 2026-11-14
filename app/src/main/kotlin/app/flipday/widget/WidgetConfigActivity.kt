@@ -87,7 +87,6 @@ import app.flipday.R
 import app.flipday.core.NumeralMode
 import app.flipday.ui.theme.FlipdayTheme
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -231,23 +230,25 @@ private fun previewSize(s: WidgetSize) = when (s) {
     WidgetSize.MEDIUM -> DpSize(250.dp, 110.dp); WidgetSize.LARGE -> DpSize(250.dp, 250.dp)
 }
 
-@OptIn(androidx.glance.ExperimentalGlanceApi::class)
+@OptIn(androidx.glance.appwidget.ExperimentalGlanceRemoteViewsApi::class)
 @Composable
 private fun LivePreview(draft: Draft, appWidgetId: Int, size: WidgetSize) {
     val context = LocalContext.current
+    val container = (context.applicationContext as FlipdayApp).container
+    val events by container.repository.observeEvents().collectAsState(initial = emptyList())
+    val appSettings by container.settings.settings.collectAsState(initial = app.flipday.data.AppSettings())
     val prefs = draft.toPrefs()
-    var views by remember { mutableStateOf<android.widget.RemoteViews?>(null) }
-    // Photo choices are read from the widget's own file, so the file name (the id) is part of the key.
-    LaunchedEffect(prefs, size, draft.photoVersion) {
-        val d = previewSize(size)
-        val options = Bundle().apply {
-            putParcelableArrayList(AppWidgetManager.OPTION_APPWIDGET_SIZES, arrayListOf(android.util.SizeF(d.width.value, d.height.value)))
-            putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, d.width.value.toInt()); putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH, d.width.value.toInt())
-            putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, d.height.value.toInt()); putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, d.height.value.toInt())
-        }
-        views = runCatching { BigNumberWidget().runComposition(context, AppWidgetIdFor(appWidgetId), options, prefs).first() }.getOrNull()
-    }
     val d = previewSize(size)
+    var views by remember { mutableStateOf<android.widget.RemoteViews?>(null) }
+    // The photo is read from the widget's own file, so a new photo (photoVersion) must redraw too.
+    LaunchedEffect(prefs, size, draft.photoVersion, events, appSettings) {
+        val locale = context.resources.configuration.locales[0]
+        views = runCatching {
+            androidx.glance.appwidget.GlanceRemoteViews().compose(context = context, size = d, appWidgetId = appWidgetId, state = prefs) {
+                WidgetBody(context, appWidgetId, events.filter { it.archivedOn == null }, appSettings.numerals, locale, WidgetTemplate.BIG, prefs)
+            }.remoteViews
+        }.getOrNull()
+    }
     AndroidView(
         factory = { FrameLayout(it) },
         update = { frame -> views?.let { rv -> frame.removeAllViews(); frame.addView(rv.apply(frame.context, frame)) } },
@@ -399,5 +400,3 @@ private fun ChoiceRow(label: String, selected: Boolean, onClick: () -> Unit) {
         Text(label, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.padding(start = 8.dp))
     }
 }
-
-private fun AppWidgetIdFor(id: Int): GlanceId = androidx.glance.appwidget.AppWidgetId(id)

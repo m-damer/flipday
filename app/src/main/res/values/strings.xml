@@ -357,4 +357,12 @@
     <string name="time_ymd">Y·M·D</string>
     <string name="time_live">Live</string>
     <string name="studio_time_live_note">Live shows days, hours and minutes and updates about every 15 minutes.</string>
+    <string name="gallery_all">All</string>
+    <string name="gallery_strip">Strip · 4×1</string>
+    <string name="gallery_small">Small · 2×2</string>
+    <string name="gallery_medium">Medium · 4×2</string>
+    <string name="gallery_large">Large · 4×4</string>
+    <string name="sample_project">Project launch</string>
+    <string name="sample_birthday">Layla’s birthday</string>
+    <string name="sample_countup">Graduation day</string>
 </resources>

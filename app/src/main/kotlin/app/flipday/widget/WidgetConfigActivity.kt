@@ -6,7 +6,6 @@ import android.content.Intent
 import android.graphics.BitmapFactory
 import android.os.Build
 import android.os.Bundle
-import android.widget.FrameLayout
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -70,9 +69,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.mutablePreferencesOf
 import androidx.glance.GlanceId
@@ -224,36 +221,14 @@ private fun sizeLabel(s: WidgetSize) = when (s) {
     WidgetSize.MEDIUM -> R.string.size_medium; WidgetSize.LARGE -> R.string.size_large
 }
 
-/** Launcher-cell sizes from the design: strip 4x1 (338x72), small 2x2 (158), medium 4x2 (338x158), large 4x4 (338x354), scaled to fit a phone. */
-private fun previewSize(s: WidgetSize) = when (s) {
-    WidgetSize.STRIP -> DpSize(250.dp, 40.dp); WidgetSize.SMALL -> DpSize(110.dp, 110.dp)
-    WidgetSize.MEDIUM -> DpSize(250.dp, 110.dp); WidgetSize.LARGE -> DpSize(250.dp, 250.dp)
-}
-
-@OptIn(androidx.glance.appwidget.ExperimentalGlanceRemoteViewsApi::class)
 @Composable
 private fun LivePreview(draft: Draft, appWidgetId: Int, size: WidgetSize) {
     val context = LocalContext.current
     val container = (context.applicationContext as FlipdayApp).container
     val events by container.repository.observeEvents().collectAsState(initial = emptyList())
     val appSettings by container.settings.settings.collectAsState(initial = app.flipday.data.AppSettings())
-    val prefs = draft.toPrefs()
-    val d = previewSize(size)
-    var views by remember { mutableStateOf<android.widget.RemoteViews?>(null) }
-    // The photo is read from the widget's own file, so a new photo (photoVersion) must redraw too.
-    LaunchedEffect(prefs, size, draft.photoVersion, events, appSettings) {
-        val locale = context.resources.configuration.locales[0]
-        views = runCatching {
-            androidx.glance.appwidget.GlanceRemoteViews().compose(context = context, size = d, state = prefs) {
-                WidgetBody(context, appWidgetId, events.filter { it.archivedOn == null }, appSettings.numerals, locale, WidgetTemplate.BIG, prefs)
-            }.remoteViews
-        }.getOrNull()
-    }
-    AndroidView(
-        factory = { FrameLayout(it) },
-        update = { frame -> views?.let { rv -> frame.removeAllViews(); frame.addView(rv.apply(frame.context, frame)) } },
-        modifier = Modifier.size(d.width, d.height).clip(MaterialTheme.shapes.large),
-    )
+    // A new photo is read from the widget's own file, so a new photo (photoVersion) must redraw too.
+    LiveWidgetPreview(draft.toPrefs(), size, withSamples(context, events.filter { it.archivedOn == null }), appSettings.numerals, appWidgetId, draft.photoVersion)
 }
 
 @Composable

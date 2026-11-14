@@ -40,6 +40,9 @@ class EventsViewModel(private val c: AppContainer) : ViewModel() {
         EventQueries.active(all, q, LocalDate.now())
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
+    /** Every event, ignoring the list's filter and sort, for the widget gallery's previews. */
+    val allEvents: StateFlow<List<Event>> = c.repository.observeEvents().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
     fun setType(t: EventType?) { queryState.value = queryState.value.copy(type = t) }
     fun apply(sort: EventSort, showCompleted: Boolean, type: EventType?) {
         queryState.value = queryState.value.copy(sort = sort, showCompleted = showCompleted, type = type)

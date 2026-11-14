@@ -429,4 +429,12 @@
     <string name="time_ymd">سنة·شهر·يوم</string>
     <string name="time_live">مباشر</string>
     <string name="studio_time_live_note">المباشر يعرض الأيام والساعات والدقائق ويتحدّث كل ١٥ دقيقة تقريبًا.</string>
+    <string name="gallery_all">الكل</string>
+    <string name="gallery_strip">شريط · 4×1</string>
+    <string name="gallery_small">صغير · 2×2</string>
+    <string name="gallery_medium">متوسط · 4×2</string>
+    <string name="gallery_large">كبير · 4×4</string>
+    <string name="sample_project">إطلاق المشروع</string>
+    <string name="sample_birthday">عيد ميلاد ليلى</string>
+    <string name="sample_countup">يوم التخرج</string>
 </resources>

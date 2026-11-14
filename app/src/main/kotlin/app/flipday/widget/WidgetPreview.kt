@@ -1,87 +1,67 @@
 package app.flipday.widget
 
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
+import android.content.Context
+import android.widget.FrameLayout
+import android.widget.RemoteViews
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.semantics.clearAndSetSemantics
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.datastore.preferences.core.Preferences
+import app.flipday.R
+import app.flipday.core.Event
+import app.flipday.core.EventType
+import app.flipday.core.NumeralMode
+import java.time.LocalDate
+
+/** Launcher-cell sizes from the design: strip 4x1, small 2x2, medium 4x2, large 4x4 (dp as the widget layouts see them). */
+internal fun previewSize(s: WidgetSize) = when (s) {
+    WidgetSize.STRIP -> DpSize(250.dp, 40.dp); WidgetSize.SMALL -> DpSize(110.dp, 110.dp)
+    WidgetSize.MEDIUM -> DpSize(250.dp, 110.dp); WidgetSize.LARGE -> DpSize(250.dp, 250.dp)
+}
 
 /**
- * In-app preview that mirrors the home-screen widget (same colours, same small layout).
- * Colours come from [WidgetAccent] because Glance cannot read the Compose theme; the real widget uses the same values.
+ * The real widget, drawn in the app: the same [WidgetBody] the home screen uses, rendered to RemoteViews and inflated here.
+ * What this shows is what the launcher shows, because there is only one set of layouts.
  */
+@OptIn(androidx.glance.appwidget.ExperimentalGlanceRemoteViewsApi::class)
 @Composable
-fun WidgetPreview(
-    title: String, digits: String, unit: String, description: String,
-    template: WidgetTemplate, accent: WidgetAccent, showTitle: Boolean, showUnit: Boolean,
-    modifier: Modifier = Modifier,
-    progress: Float = 0.92f,
-) {
-    val dark = isSystemInDarkTheme()
-    val flap = true
-    val dim = if (flap) (if (dark) Color(0xFF37373B) else Color(0xFFDAD6CB)) else Color(0x33FFFFFF)
-    val arc = if (dark) Color(accent.bgNight) else Color(accent.bgDay)
-    val bg = if (flap) (if (dark) Color(0xFF242427) else Color.White) else Color(if (dark) accent.bgNight else accent.bgDay)
-    val ink = if (flap) (if (dark) Color(0xFFF2EFE6) else Color(0xFF1A1A1C)) else Color.White
-    val muted = if (flap) (if (dark) Color(0xFFA39F94) else Color(0xFF625E54)) else Color(0xFFE8F4F1)
-    Column(
-        modifier.clearAndSetSemantics { contentDescription = description }.background(bg, RoundedCornerShape(24.dp)).padding(14.dp),
-        horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center,
-    ) {
-        if (showTitle && template != WidgetTemplate.RING) Text(title, color = ink, fontSize = 14.sp, fontWeight = FontWeight.Medium, maxLines = 1)
-        if (template == WidgetTemplate.RING) Box(Modifier.size(132.dp), contentAlignment = Alignment.Center) {
-            Canvas(Modifier.fillMaxSize()) {
-                val w = 9.dp.toPx()
-                val inset = w / 2
-                val box = Size(size.width - w, size.height - w)
-                drawArc(dim, 0f, 360f, false, Offset(inset, inset), box, style = Stroke(w, cap = StrokeCap.Round))
-                if (progress > 0f) drawArc(arc, -90f, 360f * progress.coerceIn(0f, 1f), false, Offset(inset, inset), box, style = Stroke(w, cap = StrokeCap.Round))
-            }
-            CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
-                Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-                    digits.forEach { ch ->
-                        Box(Modifier.width(22.dp).height(34.dp).background(Color(0xFF050506), RoundedCornerShape(4.dp)), contentAlignment = Alignment.Center) {
-                            Text(ch.toString(), color = Color(accent.digit), fontSize = with(LocalDensity.current) { 22.dp.toSp() }, fontWeight = FontWeight.Bold)
-                        }
-                    }
-                }
-            }
-        } else CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
-            Row(Modifier.padding(vertical = 6.dp), horizontalArrangement = Arrangement.spacedBy(3.dp)) {
-                digits.forEach { ch ->
-                    if (flap) Box(Modifier.width(34.dp).height(52.dp).background(Color(0xFF050506), RoundedCornerShape(5.dp)), contentAlignment = Alignment.Center) {
-                        Text(ch.toString(), color = Color(accent.digit), fontSize = with(LocalDensity.current) { 34.dp.toSp() }, fontWeight = FontWeight.Bold)
-                    } else Text(ch.toString(), color = ink, fontSize = 46.sp, fontWeight = FontWeight.Bold)
-                }
-            }
-        }
-        if (showUnit) Text(unit, color = muted, fontSize = 12.sp)
+internal fun LiveWidgetPreview(prefs: Preferences, size: WidgetSize, events: List<Event>, numerals: NumeralMode, appWidgetId: Int = -1, refresh: Int = 0) {
+    val context = LocalContext.current
+    val d = previewSize(size)
+    var views by remember { mutableStateOf<RemoteViews?>(null) }
+    LaunchedEffect(prefs, size, events, numerals, refresh) {
+        val locale = context.resources.configuration.locales[0]
+        views = runCatching {
+            androidx.glance.appwidget.GlanceRemoteViews().compose(context = context, size = d, state = prefs) {
+                WidgetBody(context, appWidgetId, events, numerals, locale, WidgetTemplate.BIG, prefs)
+            }.remoteViews
+        }.getOrNull()
     }
+    AndroidView(
+        factory = { FrameLayout(it) },
+        update = { frame -> views?.let { rv -> frame.removeAllViews(); frame.addView(rv.apply(frame.context, frame)) } },
+        modifier = Modifier.size(d.width, d.height).clip(MaterialTheme.shapes.large),
+    )
+}
+
+/** Example events for previews: your own events when you have them, and a sample of each kind that is missing. */
+internal fun withSamples(context: Context, real: List<Event>, today: LocalDate = LocalDate.now()): List<Event> {
+    val samples = listOf(
+        Event(id = -1, title = context.getString(R.string.widget_sample_title), type = EventType.COUNTDOWN, date = today.plusDays(23), startDate = today.minusDays(280)),
+        Event(id = -2, title = context.getString(R.string.sample_project), type = EventType.COUNTDOWN, date = today.plusDays(9), startDate = today.minusDays(60)),
+        Event(id = -3, title = context.getString(R.string.sample_birthday), type = EventType.AGE, date = today.minusYears(6).minusMonths(10).minusDays(20)),
+        Event(id = -4, title = context.getString(R.string.sample_countup), type = EventType.COUNTUP, date = today.minusDays(894)),
+    )
+    return real + samples.filter { s -> real.none { it.type == s.type } }
 }

@@ -12,9 +12,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import app.flipday.core.NumeralFormatter
 import app.flipday.ui.SettingsViewModel
-import app.flipday.widget.WidgetAccent
 import app.flipday.widget.WidgetDraft
-import app.flipday.widget.WidgetPreview
 import app.flipday.widget.WidgetTemplate
 import android.appwidget.AppWidgetManager
 import android.content.ActivityNotFoundException
@@ -53,6 +51,16 @@ import androidx.compose.ui.unit.dp
 import app.flipday.DeveloperInfo
 import app.flipday.R
 import app.flipday.ui.components.FlipNumber
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.material3.FilterChip
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
+import androidx.datastore.preferences.core.mutablePreferencesOf
+import app.flipday.ui.EventsViewModel
+import app.flipday.widget.LiveWidgetPreview
+import app.flipday.widget.WidgetKeys
+import app.flipday.widget.WidgetSize
+import app.flipday.widget.withSamples
 import app.flipday.widget.AgeWidgetReceiver
 import app.flipday.widget.AgendaWidgetReceiver
 import app.flipday.widget.BigNumberWidgetReceiver
@@ -130,23 +138,31 @@ fun WidgetsScreen(factory: ViewModelProvider.Factory) {
     val context = LocalContext.current
     val settingsVm: SettingsViewModel = viewModel(factory = factory)
     val settings by settingsVm.settings.collectAsState()
-    val tag = LocalConfiguration.current.locales[0].toLanguageTag()
-    val digits = NumeralFormatter.format("24", settings.numerals, tag)
-    val title = stringResource(R.string.widget_sample_title)
-    val unit = stringResource(R.string.label_days)
+    val eventsVm: EventsViewModel = viewModel(factory = factory)
+    val events by eventsVm.allEvents.collectAsState()
     var unsupported by remember { mutableStateOf(false) }
+    // null means "All": every family at its natural size. Otherwise only the families that come in that size.
+    var filter by remember { mutableStateOf<WidgetSize?>(null) }
+    val sample = withSamples(context, events.filter { it.archivedOn == null })
 
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        Text(stringResource(R.string.tab_widgets), style = MaterialTheme.typography.headlineSmall)
+        Text(stringResource(R.string.tab_widgets), style = MaterialTheme.typography.headlineSmall, modifier = Modifier.semantics { heading() })
         Text(stringResource(R.string.widgets_intro), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        WidgetTemplate.entries.map { Triple(it, templateName(it), templateDesc(it)) }.forEach { (template, name, desc) ->
+        Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            FilterChip(selected = filter == null, onClick = { filter = null }, label = { Text(stringResource(R.string.gallery_all)) })
+            WidgetSize.entries.forEach { s ->
+                FilterChip(selected = filter == s, onClick = { filter = s }, label = { Text(stringResource(galleryLabel(s))) })
+            }
+        }
+        WidgetTemplate.entries.filter { t -> filter == null || filter != WidgetSize.SMALL || t.hasSmall }.forEach { template ->
+            val size = filter ?: if (template.hasSmall) WidgetSize.SMALL else WidgetSize.MEDIUM
             Surface(shape = MaterialTheme.shapes.large, color = MaterialTheme.colorScheme.surface, modifier = Modifier.fillMaxWidth()) {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                        WidgetPreview(title, digits, unit, "$title, $digits $unit", template, WidgetAccent.TEAL, true, true, Modifier.width(170.dp))
+                        LiveWidgetPreview(mutablePreferencesOf(WidgetKeys.TEMPLATE to template.name), size, sample, settings.numerals)
                     }
-                    Text(stringResource(name), style = MaterialTheme.typography.titleMedium)
-                    Text(stringResource(desc), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(stringResource(templateName(template)), style = MaterialTheme.typography.titleMedium)
+                    Text(stringResource(templateDesc(template)), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Button(onClick = {
                         WidgetDraft.template = template
                         val manager = AppWidgetManager.getInstance(context)
@@ -158,6 +174,11 @@ fun WidgetsScreen(factory: ViewModelProvider.Factory) {
         }
         if (unsupported) Text(stringResource(R.string.widgets_pin_unsupported), color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium)
     }
+}
+
+private fun galleryLabel(s: WidgetSize) = when (s) {
+    WidgetSize.STRIP -> R.string.gallery_strip; WidgetSize.SMALL -> R.string.gallery_small
+    WidgetSize.MEDIUM -> R.string.gallery_medium; WidgetSize.LARGE -> R.string.gallery_large
 }
 
 private fun receiverFor(t: WidgetTemplate): Class<*> = when (t) {

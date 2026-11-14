@@ -61,14 +61,13 @@ import app.flipday.core.PeriodPhase
 import app.flipday.core.NumeralFormatter
 import app.flipday.ui.DetailViewModel
 import app.flipday.ui.SettingsViewModel
-import app.flipday.ui.components.FlipNumber
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DetailScreen(factory: ViewModelProvider.Factory, eventId: Long, onBack: () -> Unit, onEdit: (Long) -> Unit, onOpenEvent: (Long) -> Unit, showBack: Boolean = true) {
+fun DetailScreen(factory: ViewModelProvider.Factory, eventId: Long, onBack: () -> Unit, onEdit: (Long) -> Unit, onOpenEvent: (Long) -> Unit, showBack: Boolean = true, onWidget: () -> Unit = {}) {
     val vm: DetailViewModel = viewModel(factory = factory)
     val settingsVm: SettingsViewModel = viewModel(factory = factory)
     val settings by settingsVm.settings.collectAsState()
@@ -76,6 +75,8 @@ fun DetailScreen(factory: ViewModelProvider.Factory, eventId: Long, onBack: () -
     val locale = LocalConfiguration.current.locales[0]
     val tag = locale.toLanguageTag()
     val today = LocalDate.now()
+    var now by remember { mutableStateOf(java.time.LocalDateTime.now()) }
+    LaunchedEffect(Unit) { while (true) { kotlinx.coroutines.delay(30_000); now = java.time.LocalDateTime.now() } }
     val fmt = DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG).withLocale(locale)
     fun n(v: Any) = NumeralFormatter.format(v.toString(), settings.numerals, tag)
     fun d(date: LocalDate) = NumeralFormatter.format(date.format(fmt), settings.numerals, tag)
@@ -109,7 +110,6 @@ fun DetailScreen(factory: ViewModelProvider.Factory, eventId: Long, onBack: () -
                             vm.duplicate(e, context.getString(R.string.duplicate_title, e.title), onOpenEvent)
                         })
                         if (e.type == EventType.COUNTUP) DropdownMenuItem(text = { Text(stringResource(R.string.action_mark_ended)) }, onClick = { menuOpen = false; confirmEnd = true })
-                        DropdownMenuItem(text = { Text(stringResource(R.string.action_share)) }, onClick = { menuOpen = false; sharing = true })
                         DropdownMenuItem(text = { Text(stringResource(R.string.action_archive)) }, onClick = { menuOpen = false; vm.archive(e); onBack() })
                         DropdownMenuItem(text = { Text(stringResource(R.string.action_delete), color = MaterialTheme.colorScheme.error) }, onClick = { menuOpen = false; confirmDelete = true })
                     }
@@ -129,40 +129,30 @@ fun DetailScreen(factory: ViewModelProvider.Factory, eventId: Long, onBack: () -
             horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Text(e.title, style = MaterialTheme.typography.headlineMedium)
-            Spacer(Modifier.height(8.dp))
-            FlipNumber(digits, description, tileHeight = 96.dp)
-            Text(stringResource(unit), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Spacer(Modifier.height(8.dp))
-            if (!isPeriod) Text(d(e.date), style = MaterialTheme.typography.bodyLarge)
+            Spacer(Modifier.height(4.dp))
+            DetailHero(e, today, now, description, ::n, ::d)
             when (e.type) {
                 EventType.AGE -> {
                     Text(stringResource(R.string.detail_next_birthday, d(EventCalculator.nextBirthday(e.date, today))), style = MaterialTheme.typography.bodyMedium)
                     Text(stringResource(R.string.detail_turns, n(EventCalculator.turnsAge(e.date, today))), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 EventType.COUNTUP -> Text(stringResource(R.string.detail_started, d(e.date)), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                EventType.PERIOD -> {
-                    val end = e.endDate!!
-                    val st = EventCalculator.period(e.date, end, today)
-                    Text(subtitle, style = MaterialTheme.typography.bodyLarge)
-                    LinearProgressIndicator(progress = { st.progress.toFloat() }, modifier = Modifier.fillMaxWidth())
-                    if (st.phase == PeriodPhase.ONGOING) Text(
-                        stringResource(R.string.period_progress, n(st.dayNumber), n(st.totalDays)),
-                        style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    ) else if (st.phase == PeriodPhase.ENDED) Text(
-                        stringResource(R.string.period_completed), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        Column(Modifier.weight(1f)) {
-                            Text(stringResource(R.string.detail_from), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            Text(d(e.date), style = MaterialTheme.typography.bodyLarge)
-                        }
-                        Column(Modifier.weight(1f)) {
-                            Text(stringResource(R.string.detail_to), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            Text(d(end), style = MaterialTheme.typography.bodyLarge)
-                        }
+                EventType.PERIOD -> Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Column(Modifier.weight(1f)) {
+                        Text(stringResource(R.string.detail_from), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(d(e.date), style = MaterialTheme.typography.bodyLarge)
+                    }
+                    Column(Modifier.weight(1f)) {
+                        Text(stringResource(R.string.detail_to), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(d(e.endDate!!), style = MaterialTheme.typography.bodyLarge)
                     }
                 }
                 EventType.COUNTDOWN -> Unit
+            }
+            if (e.archivedOn == null) Row(Modifier.fillMaxWidth().padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedButton(onClick = { onEdit(eventId) }, modifier = Modifier.weight(1f)) { Text(stringResource(R.string.action_edit)) }
+                OutlinedButton(onClick = onWidget, modifier = Modifier.weight(1f)) { Text(stringResource(R.string.action_widget)) }
+                OutlinedButton(onClick = { sharing = true }, modifier = Modifier.weight(1f)) { Text(stringResource(R.string.action_share)) }
             }
             if (e.archivedOn != null) {
                 Text(stringResource(R.string.archived_on, d(e.archivedOn!!)), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)

@@ -437,4 +437,24 @@
     <string name="sample_project">إطلاق المشروع</string>
     <string name="sample_birthday">عيد ميلاد ليلى</string>
     <string name="sample_countup">يوم التخرج</string>
+    <string name="detail_eyebrow_down">العدّ التنازلي</string>
+    <string name="detail_eyebrow_ends">ينتهي بعد</string>
+    <string name="detail_eyebrow_starts">يبدأ بعد</string>
+    <string name="detail_eyebrow_lasted">استمرّ</string>
+    <string name="detail_eyebrow_since">الوقت منذ</string>
+    <string name="detail_eyebrow_age">العمر</string>
+    <string name="detail_eyebrow_today">يوم الحدث</string>
+    <string name="detail_eyebrow_done">اكتمل</string>
+    <string name="detail_today_msg">إنه اليوم. استمتع به.</string>
+    <string name="detail_done_msg">لقد انقضى هذا الحدث.</string>
+    <string name="detail_milestone">محطة %1$s يوم · %2$s</string>
+    <string name="detail_percent">%1$s%%</string>
+    <string name="unit_hrs">ساعات</string>
+    <string name="unit_min">دقائق</string>
+    <string name="unit_days">أيام</string>
+    <string name="unit_wks">أسابيع</string>
+    <string name="unit_yrs">سنوات</string>
+    <string name="unit_mth">أشهر</string>
+    <string name="unit_lived">أيام العمر</string>
+    <string name="action_widget">ويدجت</string>
 </resources>

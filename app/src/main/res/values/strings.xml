@@ -365,4 +365,24 @@
     <string name="sample_project">Project launch</string>
     <string name="sample_birthday">Layla’s birthday</string>
     <string name="sample_countup">Graduation day</string>
+    <string name="detail_eyebrow_down">COUNTING DOWN</string>
+    <string name="detail_eyebrow_ends">ENDS IN</string>
+    <string name="detail_eyebrow_starts">STARTS IN</string>
+    <string name="detail_eyebrow_lasted">LASTED</string>
+    <string name="detail_eyebrow_since">TIME SINCE</string>
+    <string name="detail_eyebrow_age">AGE</string>
+    <string name="detail_eyebrow_today">EVENT DAY</string>
+    <string name="detail_eyebrow_done">COMPLETED</string>
+    <string name="detail_today_msg">It is today. Enjoy it.</string>
+    <string name="detail_done_msg">This one has passed.</string>
+    <string name="detail_milestone">%1$s-day milestone · %2$s</string>
+    <string name="detail_percent">%1$s%%</string>
+    <string name="unit_hrs">HRS</string>
+    <string name="unit_min">MIN</string>
+    <string name="unit_days">DAYS</string>
+    <string name="unit_wks">WKS</string>
+    <string name="unit_yrs">YRS</string>
+    <string name="unit_mth">MTH</string>
+    <string name="unit_lived">DAYS LIVED</string>
+    <string name="action_widget">Widget</string>
 </resources>

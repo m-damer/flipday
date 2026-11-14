@@ -155,7 +155,7 @@ fun FlipdayRoot(factory: ViewModelProvider.Factory, openEventId: Long? = null, o
                         val id = selectedEvent
                         if (id != null) DetailScreen(
                             factory, id, onBack = { selectedEvent = null }, onEdit = { e -> nav.navigate("edit/$e") },
-                            onOpenEvent = { n -> selectedEvent = n }, showBack = false,
+                            onOpenEvent = { n -> selectedEvent = n }, showBack = false, onWidget = { nav.navigate(Routes.WIDGETS) },
                         )
                     }
                 } else EventsScreen(factory, onOpen = { nav.navigate("detail/$it") }, onSearch = { nav.navigate(Routes.SEARCH) }, onArchive = { nav.navigate(Routes.ARCHIVE) })
@@ -174,7 +174,7 @@ fun FlipdayRoot(factory: ViewModelProvider.Factory, openEventId: Long? = null, o
             }
             composable(Routes.DETAIL, arguments = listOf(navArgument("id") { type = NavType.LongType })) {
                 val id = it.arguments?.getLong("id") ?: 0L
-                DetailScreen(factory, id, onBack = { nav.popBackStack() }, onEdit = { e -> nav.navigate("edit/$e") }, onOpenEvent = { n -> nav.navigate("detail/$n") })
+                DetailScreen(factory, id, onBack = { nav.popBackStack() }, onEdit = { e -> nav.navigate("edit/$e") }, onOpenEvent = { n -> nav.navigate("detail/$n") }, onWidget = { nav.navigate(Routes.WIDGETS) })
             }
             composable(Routes.BACKUP) { BackupScreen(factory, onBack = { nav.popBackStack() }) }
             composable(Routes.ABOUT) { AboutScreen(onBack = { nav.popBackStack() }, onDeveloper = { nav.navigate(Routes.DEVELOPER) }, onPrivacy = { nav.navigate(Routes.PRIVACY) }, onLicenses = { nav.navigate(Routes.LICENSES) }) }

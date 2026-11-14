@@ -60,6 +60,16 @@ val LightColors: ColorScheme = lightColorScheme(
     outline = TealLight.outline, outlineVariant = TealLight.outlineVariant,
     error = TealLight.error, onError = TealLight.onError,
     inverseSurface = TealLight.inverseSurface, inverseOnSurface = TealLight.inverseOnSurface, inversePrimary = TealLight.inversePrimary,
+    // Roles the design does not list are mapped to its tokens so Material's default purple never shows.
+    primaryContainer = TealLight.secondaryContainer, onPrimaryContainer = TealLight.onSecondaryContainer,
+    secondary = TealLight.primary, onSecondary = TealLight.onPrimary,
+    tertiary = TealLight.primary, onTertiary = TealLight.onPrimary,
+    tertiaryContainer = TealLight.secondaryContainer, onTertiaryContainer = TealLight.onSecondaryContainer,
+    errorContainer = Color(0xFFF9DEDC), onErrorContainer = Color(0xFF410E0B),
+    surfaceVariant = TealLight.outlineVariant, surfaceTint = TealLight.primary, scrim = Color(0xFF000000),
+    surfaceBright = TealLight.surface, surfaceDim = TealLight.background,
+    surfaceContainerLowest = TealLight.surface, surfaceContainerLow = TealLight.surface, surfaceContainer = TealLight.surface,
+    surfaceContainerHigh = TealLight.surface, surfaceContainerHighest = Color(0xFFECE8DE),
 )
 val DarkColors: ColorScheme = darkColorScheme(
     primary = TealDark.primary, onPrimary = TealDark.onPrimary,
@@ -69,4 +79,13 @@ val DarkColors: ColorScheme = darkColorScheme(
     outline = TealDark.outline, outlineVariant = TealDark.outlineVariant,
     error = TealDark.error, onError = TealDark.onError,
     inverseSurface = TealDark.inverseSurface, inverseOnSurface = TealDark.inverseOnSurface, inversePrimary = TealDark.inversePrimary,
+    primaryContainer = TealDark.secondaryContainer, onPrimaryContainer = TealDark.onSecondaryContainer,
+    secondary = TealDark.primary, onSecondary = TealDark.onPrimary,
+    tertiary = TealDark.primary, onTertiary = TealDark.onPrimary,
+    tertiaryContainer = TealDark.secondaryContainer, onTertiaryContainer = TealDark.onSecondaryContainer,
+    errorContainer = Color(0xFF8C1D18), onErrorContainer = Color(0xFFF9DEDC),
+    surfaceVariant = TealDark.outlineVariant, surfaceTint = TealDark.primary, scrim = Color(0xFF000000),
+    surfaceBright = Color(0xFF2D2D30), surfaceDim = TealDark.background,
+    surfaceContainerLowest = TealDark.background, surfaceContainerLow = TealDark.surface, surfaceContainer = TealDark.surface,
+    surfaceContainerHigh = TealDark.surface, surfaceContainerHighest = Color(0xFF2D2D30),
 )

@@ -8,6 +8,7 @@ import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Widgets
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
@@ -101,13 +102,16 @@ fun FlipdayRoot(factory: ViewModelProvider.Factory, openEventId: Long? = null, o
         snackbarHost = { SnackbarHost(snackbar) },
         floatingActionButton = {
             if (route == Routes.EVENTS) {
-                FloatingActionButton(onClick = { nav.navigate(Routes.ADD) }) {
+                FloatingActionButton(
+                    onClick = { nav.navigate(Routes.ADD) }, shape = MaterialTheme.shapes.small,
+                    containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary,
+                ) {
                     Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.add_event))
                 }
             }
         },
         bottomBar = {
-            if (onTab && !useRail) NavigationBar {
+            if (onTab && !useRail) NavigationBar(containerColor = MaterialTheme.colorScheme.surface) {
                 tabs.forEach { t ->
                     NavigationBarItem(
                         selected = route == t.route,

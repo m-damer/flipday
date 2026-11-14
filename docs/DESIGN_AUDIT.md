@@ -59,5 +59,6 @@ Known deviations from the design:
 - Progress bars use Material's linear indicator, not the segmented bar.
 - Event-day screen reuses the detail layout (EVENT DAY eyebrow plus message) rather than a separate full-screen design.
 
-Still needs design before building: widget empty/loading/needs-setup states for the new families, period widget layout, studio on tablet and landscape, share card variants for count-up and period, Settings board 06C refresh.
+Designed on board 06G and built: widget loading, deleted, no-events and agenda-empty states; period widget on the big layout; count-up and period share cards; revised Settings (Week start gone, Exact reminders and Updates rows). In-app updates added (GitHub Releases, WorkManager every 3.5 days, Android confirms the install; needs the Internet and install-packages permissions, privacy text updated).
+Not built, by decision: studio on tablet and landscape (the owner does not use a tablet).
 Needs a device: RTL tile order, corner clipping, TalkBack and 200% font, phone and tablet layouts.

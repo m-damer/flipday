@@ -188,11 +188,11 @@ fun DetailScreen(factory: ViewModelProvider.Factory, eventId: Long, onBack: () -
                             val subtitle = if (e.type == EventType.PERIOD) periodSubtitle(context, e, today, settings.numerals, locale) else d(e.date)
                             val unitText = context.getString(unit)
                             val palette = SharePalette(colors.surface.toArgb(), colors.onSurface.toArgb(), colors.onSurfaceVariant.toArgb(), colors.primary.toArgb(), flap.tile.toArgb(), flap.digit.toArgb())
-                            val caption = if (e.type == EventType.COUNTDOWN) context.getString(R.string.share_caption_due) else null
+                            val content = shareContent(context, e, today, settings.numerals, tag, value)
                             scope.launch {
                                 val ok = runCatching {
                                     val bitmap = withContext(Dispatchers.Default) {
-                                        ShareCard.render(context, format, e.title, digits, unitText, subtitle, caption, context.getString(R.string.app_name), palette)
+                                        ShareCard.render(context, format, e.title, content.digits, unitText, subtitle, content.caption, context.getString(R.string.app_name), palette, content.extras)
                                     }
                                     ShareCard.share(context, bitmap, context.getString(R.string.share_text, e.title, digits, unitText), context.getString(R.string.share_chooser))
                                 }.isSuccess

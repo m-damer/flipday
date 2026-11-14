@@ -39,6 +39,7 @@ import app.flipday.R
 import app.flipday.core.Event
 import app.flipday.core.EventCalculator
 import app.flipday.core.EventType
+import app.flipday.core.PeriodPhase
 import app.flipday.core.WidgetMath
 import java.time.Period
 import kotlin.math.roundToInt
@@ -61,10 +62,31 @@ internal fun Frame(open: Action, dark: Boolean = false, pad: Dp = 12.dp, content
     Box(m.cornerRadius(st.radiusDp.dp).padding(pad).clickable(open), contentAlignment = Alignment.Center) { content() }
 }
 
+/** Empty, deleted and setup states (design 06G.1): an icon, one bold line and one muted hint. Tapping opens setup or the app. */
 @Composable
-internal fun Message(text: String, action: Action) = Frame(action) {
-    Text(text, style = TextStyle(color = Ink, fontSize = 14.sp, fontWeight = FontWeight.Medium, textAlign = TextAlign.Center))
+internal fun StateCard(@androidx.annotation.DrawableRes icon: Int, title: String, hint: String?, action: Action, look: Look? = null, eyebrow: String? = null) = Frame(action) {
+    Column(GlanceModifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalAlignment = Alignment.CenterVertically) {
+        if (eyebrow != null && look != null) { Label(eyebrow, look.accent); VGap(8.dp) }
+        Image(ImageProvider(icon), contentDescription = null, modifier = GlanceModifier.size(24.dp), colorFilter = ColorFilter.tint(accent((look?.accent ?: WidgetAccent.TEAL))))
+        VGap(6.dp)
+        Text(title, style = TextStyle(color = Ink, fontSize = 13.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center))
+        if (hint != null) Text(hint, style = TextStyle(color = Muted, fontSize = 11.sp, textAlign = TextAlign.Center))
+    }
 }
+
+/** Period widgets reuse the big layout (design 06G.2): the eyebrow, title and sub line follow the period's phase. */
+private fun eyebrowFor(c: WCtx, e: Event, fallback: Int): String =
+    if (e.type != EventType.PERIOD) c.s(fallback) else when (EventCalculator.period(e.date, e.endDate!!, c.today).phase) {
+        PeriodPhase.UPCOMING -> c.s(R.string.wd_p_starts)
+        PeriodPhase.ONGOING -> c.s(R.string.wd_p_ends)
+        PeriodPhase.ENDED -> c.s(R.string.wd_p_lasted)
+    }
+
+private fun titleFor(c: WCtx, e: Event): String =
+    if (e.type == EventType.PERIOD && EventCalculator.period(e.date, e.endDate!!, c.today).phase == PeriodPhase.ENDED) "\u2713 " + e.title else e.title
+
+private fun subFor(c: WCtx, e: Event): String =
+    if (e.type == EventType.PERIOD) app.flipday.ui.events.periodSubtitle(c.context, e, c.today, c.numerals, c.locale) else c.dateLong(e.date)
 
 @Composable private fun Icon(e: Event, look: Look, size: Dp = 20.dp, tint: ColorProvider = accent(look.accent)) =
     Image(ImageProvider(iconFor(e)), contentDescription = null, modifier = GlanceModifier.size(size), colorFilter = ColorFilter.tint(tint))
@@ -117,32 +139,32 @@ internal fun BigLayout(c: WCtx, e: Event, look: Look, size: WidgetSize, open: Ac
             WidgetSize.STRIP -> Row(GlanceModifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically) {
                 Icon(e, look); Gap(8.dp)
                 Column(GlanceModifier.defaultWeight()) {
-                    if (look.showTitle) Title(e.title, 13)
-                    DateSub(c.dateLong(e.date), 10)
+                    if (look.showTitle) Title(titleFor(c, e), 13)
+                    DateSub(subFor(c, e), 10)
                     Bar(progress, look.accent, GlanceModifier.fillMaxWidth())
                 }
                 Gap(8.dp)
                 Column(horizontalAlignment = Alignment.CenterHorizontally) { Tiles(digits, 26.dp, look.accent, 2.dp); if (look.showUnit) Sub(unit, 9) }
             }
             WidgetSize.SMALL -> Column(GlanceModifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalAlignment = Alignment.CenterVertically) {
-                if (e.type == EventType.COUNTDOWN) Label(c.s(R.string.wd_due_in), look.accent)
+                if (e.type == EventType.COUNTDOWN) Label(c.s(R.string.wd_due_in), look.accent) else if (e.type == EventType.PERIOD) Label(eyebrowFor(c, e, R.string.wd_upcoming), look.accent)
                 VGap(4.dp); BigTiles(c, e, digits, 52.dp, look); VGap(4.dp)
-                Sub(listOfNotNull(e.title.takeIf { look.showTitle }, unit.takeIf { look.showUnit }).joinToString(" · "), 11)
+                Sub(listOfNotNull(titleFor(c, e).takeIf { look.showTitle }, unit.takeIf { look.showUnit }).joinToString(" · "), 11)
             }
             WidgetSize.MEDIUM -> Column(GlanceModifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically) {
                 Row(GlanceModifier.fillMaxWidth().defaultWeight(), verticalAlignment = Alignment.CenterVertically) {
                     Column(GlanceModifier.defaultWeight()) {
-                        Label(c.s(R.string.wd_upcoming), look.accent)
-                        if (look.showTitle) Title(e.title, 15, 2)
-                        DateSub(c.dateLong(e.date), 11)
+                        Label(eyebrowFor(c, e, R.string.wd_upcoming), look.accent)
+                        if (look.showTitle) Title(titleFor(c, e), 15, 2)
+                        DateSub(subFor(c, e), 11)
                     }
                     BigTiles(c, e, digits, 56.dp, look)
                 }
                 Bar(progress, look.accent, GlanceModifier.fillMaxWidth())
             }
             WidgetSize.LARGE -> Column(GlanceModifier.fillMaxSize()) {
-                Label("${c.s(R.string.wd_upcoming)} · ${c.dayMonth(c.today)}", look.accent)
-                if (look.showTitle) Title(e.title, 17)
+                Label("${eyebrowFor(c, e, R.string.wd_upcoming)} · ${c.dayMonth(c.today)}", look.accent)
+                if (look.showTitle) Title(titleFor(c, e), 17)
                 Box(GlanceModifier.fillMaxWidth().padding(vertical = 8.dp), contentAlignment = Alignment.Center) { BigTiles(c, e, digits, 84.dp, look) }
                 Bar(progress, look.accent, GlanceModifier.fillMaxWidth())
                 VGap(8.dp); Others(c, look, 3)

@@ -133,6 +133,13 @@ class SettingsViewModel(private val c: AppContainer) : ViewModel() {
     fun setNumerals(m: NumeralMode) { viewModelScope.launch { c.settings.setNumerals(m) } }
     fun setTheme(m: ThemeMode) { viewModelScope.launch { c.settings.setTheme(m) } }
     fun setNotifications(on: Boolean) { viewModelScope.launch { c.settings.setNotifications(on) } }
+    fun setAutoUpdates(context: android.content.Context, on: Boolean) {
+        app.flipday.update.UpdateScheduler.apply(context.applicationContext, on)
+        viewModelScope.launch { c.settings.setAutoUpdates(on) }
+    }
+    fun checkForUpdates(context: android.content.Context, onDone: (app.flipday.update.UpdateOutcome) -> Unit) {
+        viewModelScope.launch { onDone(kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { app.flipday.update.UpdateChecker.checkNow(context.applicationContext, c.settings) }) }
+    }
     fun markOnboarded() { viewModelScope.launch { c.settings.markOnboarded() } }
     fun markNotificationsAsked() { viewModelScope.launch { c.settings.markNotificationsAsked() } }
     fun setDefaultReminder(days: Int) { viewModelScope.launch { c.settings.setDefaultReminder(days) } }

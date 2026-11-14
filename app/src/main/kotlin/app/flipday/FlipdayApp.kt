@@ -13,6 +13,7 @@ import app.flipday.widget.WidgetRefresher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 /** Manual dependency container. Small enough that a DI framework would add more than it removes. */
@@ -35,6 +36,7 @@ class FlipdayApp : Application() {
         container = AppContainer(this)
         container.scheduler.ensureChannel()
         WidgetRefresher.scheduleNext(this)
+        CoroutineScope(Dispatchers.Default).launch { app.flipday.update.UpdateScheduler.apply(this@FlipdayApp, container.settings.settings.first().autoUpdates) }
         CoroutineScope(Dispatchers.Default).launch { runCatching { WidgetRefresher.scheduleTickerIfNeeded(this@FlipdayApp) } }
     }
 }

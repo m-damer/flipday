@@ -79,7 +79,6 @@
     <string name="notif_today">Today: %1$s</string>
     <string name="notif_tomorrow">Tomorrow: %1$s</string>
     <string name="notif_open">Open</string>
-    <string name="widget_empty">Tap to add an event</string>
     <string name="widget_deleted">Event was deleted</string>
     <string name="widgets_intro">Add a Flipday widget to your home screen to see the days left for your next event.</string>
     <string name="widget_add">Add to home screen</string>
@@ -160,7 +159,6 @@
         <item quantity="one">Finished events move here after %1$s day. You can restore them any time.</item>
         <item quantity="other">Finished events move here after %1$s days. You can restore them any time.</item>
     </plurals>
-    <string name="widget_choose">Choose event</string>
     <string name="widget_nearest">Nearest upcoming event</string>
     <string name="widget_style">STYLE</string>
     <string name="widget_show_title">Show title</string>
@@ -245,7 +243,7 @@
     <string name="widget_refresh_body">Widgets update at midnight and whenever the date, time or time zone changes. The live ticker style also updates about every 15 minutes. Nothing runs in the background otherwise.</string>
     <string name="ok_got_it">Got it</string>
     <string name="privacy_title">Privacy policy</string>
-    <string name="privacy_body">Flipday keeps everything on your phone.\n\nWhat it stores: the events you create (titles, dates, reminder settings) and your app settings. They live in the app\u2019s private storage.\n\nWhat it does not do: it has no account, no ads, no analytics, no tracking and no network connection. Nothing is sent to the developer or to anyone else.\n\nNotifications: reminders are scheduled on your phone with Android\u2019s alarm service. You can turn them off in Android settings at any time.\n\nBackups: if Android device backup is on, Android may back up your events and settings to your own Google account. That is controlled by Android, not by Flipday. Export to file creates a file only where you choose to save it.\n\nDeleting: delete an event in the app, or uninstall the app to remove all data.\n\nQuestions: use Send feedback in About.</string>
+    <string name="privacy_body">Flipday keeps everything on your phone.\n\nWhat it stores: the events you create (titles, dates, reminder settings) and your app settings. They live in the app\u2019s private storage.\n\nWhat it does not do: it has no account, no ads, no analytics, no tracking. Your events and settings never leave your phone.\n\nUpdates: twice a week, Flipday asks GitHub whether a newer version exists and, if so, downloads it. This needs the Internet permission. Nothing about you or your events is sent, but GitHub sees your IP address like any website you visit. You can turn it off in Settings.\n\nNotifications: reminders are scheduled on your phone with Android\u2019s alarm service. You can turn them off in Android settings at any time.\n\nBackups: if Android device backup is on, Android may back up your events and settings to your own Google account. That is controlled by Android, not by Flipday. Export to file creates a file only where you choose to save it.\n\nDeleting: delete an event in the app, or uninstall the app to remove all data.\n\nQuestions: use Send feedback in About.</string>
     <string name="licenses_title">Open-source licenses</string>
     <string name="licenses_intro">Flipday is built with these open-source components.</string>
     <string name="licenses_apache">Apache License 2.0</string>
@@ -403,4 +401,32 @@
     <string name="detail_days_ago">days ago</string>
     <string name="detail_turns_in">Turns %1$s in</string>
     <string name="action_keep_counting">Keep counting up</string>
+    <string name="wd_deleted">Event deleted</string>
+    <string name="wd_deleted_hint">Tap to choose another event</string>
+    <string name="wd_noevents">No events yet</string>
+    <string name="wd_noevents_hint">Tap to add one</string>
+    <string name="wd_agenda_eyebrow">Agenda</string>
+    <string name="wd_agenda_none">Nothing coming up</string>
+    <string name="wd_agenda_none_hint">Add an event to see it here</string>
+    <string name="wd_p_starts">Starts in</string>
+    <string name="wd_p_ends">Ends in</string>
+    <string name="wd_p_lasted">Lasted</string>
+    <string name="settings_updates">UPDATES</string>
+    <string name="set_updates_check">Check for updates</string>
+    <string name="set_updates_auto">Check automatically</string>
+    <string name="value_up_to_date">Up to date</string>
+    <string name="value_update_available">Update available · %1$s</string>
+    <string name="value_update_ready">Ready to install · %1$s</string>
+    <string name="value_checking">Checking…</string>
+    <string name="value_twice_week">Twice a week</string>
+    <string name="value_updates_off">Off</string>
+    <string name="update_ready_title">Update ready</string>
+    <string name="update_ready_body">Version %1$s has been downloaded. Install it now? Your events and widgets stay as they are.</string>
+    <string name="update_install">Install</string>
+    <string name="update_later">Later</string>
+    <string name="update_uptodate_toast">You have the latest version.</string>
+    <string name="update_failed_toast">Could not check for updates. Try again later.</string>
+    <string name="notif_update_channel">App updates</string>
+    <string name="notif_update_title">Update ready</string>
+    <string name="notif_update_text">Version %1$s is downloaded. Tap to install.</string>
 </resources>

@@ -5,6 +5,10 @@ name: Release APK
 #   FLIPDAY_KEYSTORE_PASSWORD, FLIPDAY_KEY_ALIAS, FLIPDAY_KEY_PASSWORD
 on: workflow_dispatch
 
+# Publishes a GitHub Release with the signed APK. The app's update check reads the latest release; its tag v0.1.<run number> carries the versionCode.
+permissions:
+  contents: write
+
 jobs:
   bundle:
     runs-on: ubuntu-latest
@@ -22,7 +26,7 @@ jobs:
           FLIPDAY_KEYSTORE_PASSWORD: ${{ secrets.FLIPDAY_KEYSTORE_PASSWORD }}
           FLIPDAY_KEY_ALIAS: ${{ secrets.FLIPDAY_KEY_ALIAS }}
           FLIPDAY_KEY_PASSWORD: ${{ secrets.FLIPDAY_KEY_PASSWORD }}
-        run: gradle :app:assembleRelease :app:bundleRelease --stacktrace
+        run: gradle :app:assembleRelease :app:bundleRelease -PversionCode=${{ github.run_number }} -PversionName=0.1.${{ github.run_number }} --stacktrace
       - uses: actions/upload-artifact@v4
         with:
           name: flipday-release-aab
@@ -31,3 +35,10 @@ jobs:
         with:
           name: flipday-release-apk
           path: app/build/outputs/apk/release/*.apk
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="0.1.${{ github.run_number }}"
+          cp app/build/outputs/apk/release/*.apk "flipday-$VERSION.apk"
+          gh release create "v$VERSION" "flipday-$VERSION.apk" --title "Flipday $VERSION" --notes "Signed APK. Flipday checks for this release twice a week and offers to install it." --latest

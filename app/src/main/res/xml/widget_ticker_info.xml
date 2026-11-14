@@ -12,5 +12,5 @@
     android:widgetCategory="home_screen"
     android:configure="app.flipday.widget.WidgetConfigActivity"
     android:widgetFeatures="reconfigurable"
-    android:initialLayout="@layout/glance_default_loading_layout"
+    android:initialLayout="@layout/widget_loading"
     android:description="@string/style_ticker_desc" />

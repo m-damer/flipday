@@ -128,8 +128,9 @@ internal fun WidgetBody(
             CompositionLocalProvider(LocalStyle provides style, LocalPalette provides paletteFor(style)) {
             when {
                 template == WidgetTemplate.YEAR -> YearLayout(c, event, look, size, openApp)
-                chosen > 0 && event == null -> Message(context.getString(R.string.widget_choose), configureAction(context, appWidgetId))
-                event == null -> Message(context.getString(R.string.widget_empty), openApp)
+                chosen > 0 && event == null -> StateCard(R.drawable.ic_state_trash, context.getString(R.string.wd_deleted), context.getString(R.string.wd_deleted_hint), configureAction(context, appWidgetId), look)
+                event == null && template == WidgetTemplate.AGENDA -> StateCard(R.drawable.ic_state_calendar, context.getString(R.string.wd_agenda_none), context.getString(R.string.wd_agenda_none_hint), openApp, look, context.getString(R.string.wd_agenda_eyebrow))
+                event == null -> StateCard(R.drawable.ic_state_plus, context.getString(R.string.wd_noevents), context.getString(R.string.wd_noevents_hint), openApp, look)
                 else -> {
                     val open = actionStartActivity(
                         Intent(context, MainActivity::class.java).putExtra(MainActivity.EXTRA_EVENT_ID, event.id).setData(Uri.parse("flipday://event/${event.id}")),

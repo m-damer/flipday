@@ -21,11 +21,14 @@ enum class ShareFormat(val width: Int, val height: Int) { SQUARE(1080, 1080), ST
 /** Colours come from the Compose theme (the caller passes them), so the card matches light and dark. */
 data class SharePalette(val background: Int, val ink: Int, val muted: Int, val accent: Int, val tile: Int, val digit: Int)
 
-/** Draws the share card (design 06F.1): caption, title, flap tiles, unit and date, app name. */
+/** What count-up and period cards add (design 06G.3): a milestone chip, or a progress bar with its label. */
+data class ShareExtras(val chip: String? = null, val progress: Float? = null, val progressLabel: String? = null)
+
+/** Draws the share card (design 06F.1, 06G.3): caption, title, flap tiles, unit and date, app name. */
 object ShareCard {
     fun render(
         context: Context, format: ShareFormat, title: String, digits: String, unit: String, subtitle: String,
-        caption: String?, appName: String, p: SharePalette,
+        caption: String?, appName: String, p: SharePalette, extras: ShareExtras = ShareExtras(),
     ): Bitmap {
         val w = format.width; val h = format.height
         val bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
@@ -53,7 +56,13 @@ object ShareCard {
 
         val titleLayout = layout(title, paint(p.ink, base * 0.07f, bold), (w - 2 * pad).toInt(), 3)
         val unitLayout = layout("$unit · $subtitle", paint(p.muted, base * 0.036f, regular), (w - 2 * pad).toInt(), 2)
-        val blockH = titleLayout.height + base * 0.04f + tileH + base * 0.03f + unitLayout.height
+        val chipPaint = paint(p.accent, base * 0.034f, bold)
+        val labelLayout = extras.progressLabel?.let { layout(it, paint(p.muted, base * 0.032f, regular), (w - 2 * pad).toInt(), 1) }
+        val barH = base * 0.016f
+        var extraH = 0f
+        if (extras.progress != null) extraH += base * 0.03f + barH + (labelLayout?.let { base * 0.015f + it.height } ?: 0f)
+        if (extras.chip != null) extraH += base * 0.03f + base * 0.085f
+        val blockH = titleLayout.height + base * 0.04f + tileH + base * 0.03f + unitLayout.height + extraH
         var y = (h - blockH) / 2f
 
         c.save(); c.translate(pad, y); titleLayout.draw(c); c.restore()
@@ -72,6 +81,27 @@ object ShareCard {
         }
         y += tileH + base * 0.03f
         c.save(); c.translate(pad, y); unitLayout.draw(c); c.restore()
+        y += unitLayout.height
+        if (extras.progress != null) {
+            y += base * 0.03f
+            val barW = (w - 2 * pad) * 0.6f
+            val left = (w - barW) / 2f
+            val track = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = (p.muted and 0x00FFFFFF) or 0x33000000 }
+            val fill = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = p.accent }
+            c.drawRoundRect(RectF(left, y, left + barW, y + barH), barH / 2, barH / 2, track)
+            c.drawRoundRect(RectF(left, y, left + barW * extras.progress.coerceIn(0f, 1f), y + barH), barH / 2, barH / 2, fill)
+            y += barH
+            labelLayout?.let { y += base * 0.015f; c.save(); c.translate(pad, y); it.draw(c); c.restore(); y += it.height }
+        }
+        extras.chip?.let { chip ->
+            y += base * 0.03f
+            val textW = chipPaint.measureText(chip)
+            val chipH = base * 0.085f
+            val left = (w - (textW + base * 0.07f)) / 2f
+            val stroke = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = p.accent; style = Paint.Style.STROKE; strokeWidth = base * 0.004f }
+            c.drawRoundRect(RectF(left, y, left + textW + base * 0.07f, y + chipH), chipH / 2, chipH / 2, stroke)
+            c.drawText(chip, left + base * 0.035f, y + chipH / 2f - (chipPaint.descent() + chipPaint.ascent()) / 2f, chipPaint)
+        }
         return bmp
     }
 

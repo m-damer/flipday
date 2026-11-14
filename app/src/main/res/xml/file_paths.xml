@@ -2,4 +2,6 @@
 <paths>
     <!-- Share cards are written here and shared through a content URI, so no storage permission is needed. -->
     <cache-path name="share" path="share/" />
+    <!-- Downloaded update APKs, handed to the system installer through a content URI. -->
+    <cache-path name="updates" path="updates/" />
 </paths>

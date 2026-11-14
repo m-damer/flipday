@@ -38,6 +38,7 @@ import androidx.core.os.LocaleListCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import app.flipday.R
+import app.flipday.BuildConfig
 import app.flipday.core.ArchivePolicy
 import app.flipday.core.NumeralFormatter
 import app.flipday.core.NumeralMode
@@ -58,6 +59,7 @@ fun SettingsScreen(factory: ViewModelProvider.Factory, onAbout: () -> Unit, onBa
     var dialog by remember { mutableStateOf<String?>(null) }
     val permission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted -> vm.setNotifications(granted) }
     val lang = LocalConfiguration.current.locales[0].language
+    val ctxForDialog = androidx.compose.ui.platform.LocalContext.current
 
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp)) {
         Text(stringResource(R.string.tab_settings), style = MaterialTheme.typography.headlineSmall, modifier = Modifier.padding(horizontal = 4.dp, vertical = 16.dp))
@@ -89,6 +91,34 @@ fun SettingsScreen(factory: ViewModelProvider.Factory, onAbout: () -> Unit, onBa
             ValueRow(stringResource(R.string.set_language), if (lang == "ar") stringResource(R.string.value_arabic) else stringResource(R.string.value_english)) { dialog = "language" }
             ValueRow(stringResource(R.string.set_numerals), numeralLabel(s.numerals)) { dialog = "numerals" }
             ValueRow(stringResource(R.string.set_theme), themeLabel(s.theme), last = true) { dialog = "theme" }
+        }
+        val ctx = androidx.compose.ui.platform.LocalContext.current
+        val updateScope = androidx.compose.runtime.rememberCoroutineScope()
+        var checking by remember { mutableStateOf(false) }
+        val updateReady = s.updateCode > BuildConfig.VERSION_CODE && app.flipday.update.UpdateChecker.isReady(ctx, s.updateCode)
+        val updateStatus = when {
+            checking -> stringResource(R.string.value_checking)
+            updateReady -> stringResource(R.string.value_update_ready, NumeralFormatter.format(s.updateName, s.numerals, lang))
+            s.updateCode > BuildConfig.VERSION_CODE -> stringResource(R.string.value_update_available, NumeralFormatter.format(s.updateName, s.numerals, lang))
+            else -> stringResource(R.string.value_up_to_date)
+        }
+        val upToDateText = stringResource(R.string.update_uptodate_toast)
+        val failedText = stringResource(R.string.update_failed_toast)
+        Section(R.string.settings_updates) {
+            ValueRow(stringResource(R.string.set_updates_check), updateStatus, enabled = !checking) {
+                if (updateReady) dialog = "install" else {
+                    checking = true
+                    vm.checkForUpdates(ctx) { outcome ->
+                        checking = false
+                        when (outcome) {
+                            is app.flipday.update.UpdateOutcome.Ready -> dialog = "install"
+                            is app.flipday.update.UpdateOutcome.UpToDate -> android.widget.Toast.makeText(ctx, upToDateText, android.widget.Toast.LENGTH_SHORT).show()
+                            else -> android.widget.Toast.makeText(ctx, failedText, android.widget.Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+            }
+            ValueRow(stringResource(R.string.set_updates_auto), stringResource(if (s.autoUpdates) R.string.value_twice_week else R.string.value_updates_off), last = true) { dialog = "autoupdate" }
         }
         Section(R.string.settings_data) {
             ValueRow(stringResource(R.string.set_backup), "", last = true, onClick = onBackup)
@@ -132,6 +162,20 @@ fun SettingsScreen(factory: ViewModelProvider.Factory, onAbout: () -> Unit, onBa
             selected = s.numerals.name,
             onPick = { vm.setNumerals(NumeralMode.valueOf(it)); dialog = null },
             onDismiss = { dialog = null },
+        )
+        "autoupdate" -> ChoiceDialog(
+            title = R.string.set_updates_auto,
+            options = listOf(stringResource(R.string.value_twice_week) to "on", stringResource(R.string.value_updates_off) to "off"),
+            selected = if (s.autoUpdates) "on" else "off",
+            onPick = { vm.setAutoUpdates(ctxForDialog, it == "on"); dialog = null },
+            onDismiss = { dialog = null },
+        )
+        "install" -> AlertDialog(
+            onDismissRequest = { dialog = null },
+            title = { Text(stringResource(R.string.update_ready_title)) },
+            text = { Text(stringResource(R.string.update_ready_body, NumeralFormatter.format(s.updateName, s.numerals, lang))) },
+            confirmButton = { TextButton(onClick = { dialog = null; ctxForDialog.startActivity(app.flipday.update.UpdateChecker.installIntent(ctxForDialog, s.updateCode)) }) { Text(stringResource(R.string.update_install)) } },
+            dismissButton = { TextButton(onClick = { dialog = null }) { Text(stringResource(R.string.update_later)) } },
         )
         "theme" -> ChoiceDialog(
             title = R.string.dialog_theme_title,

@@ -76,7 +76,7 @@ private val tabs = listOf(
  * Child screens (add, about, developer) hide the bar and show Back or Close. FAB only on Events.
  */
 @Composable
-fun FlipdayRoot(factory: ViewModelProvider.Factory, openEventId: Long? = null, onOpened: () -> Unit = {}) {
+fun FlipdayRoot(factory: ViewModelProvider.Factory, openEventId: Long? = null, onOpened: () -> Unit = {}, openUpdate: Boolean = false, onUpdateOpened: () -> Unit = {}) {
     val settingsVm: SettingsViewModel = viewModel(factory = factory)
     val appSettings by settingsVm.settings.collectAsState()
     if (!appSettings.onboarded) { OnboardingScreen(appSettings.numerals, onStart = { settingsVm.markOnboarded() }); return }
@@ -85,6 +85,9 @@ fun FlipdayRoot(factory: ViewModelProvider.Factory, openEventId: Long? = null, o
     val useRail = widthDp >= 600
     val twoPane = widthDp >= 840
     var selectedEvent by rememberSaveable { mutableStateOf<Long?>(null) }
+    LaunchedEffect(openUpdate) {
+        if (openUpdate) { nav.navigate(Routes.SETTINGS) { popUpTo(nav.graph.findStartDestination().id) { saveState = true }; launchSingleTop = true; restoreState = true }; onUpdateOpened() }
+    }
     LaunchedEffect(openEventId) { openEventId?.let { nav.navigate("detail/$it"); onOpened() } }
     val entry by nav.currentBackStackEntryAsState()
     val route = entry?.destination?.route

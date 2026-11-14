@@ -161,6 +161,10 @@ fun DetailScreen(factory: ViewModelProvider.Factory, eventId: Long, onBack: () -
                     onClick = { confirmDelete = true }, modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
                 ) { Text(stringResource(R.string.delete_forever)) }
+            } else if (e.type == EventType.COUNTDOWN && EventCalculator.phase(e.date, today) == EventPhase.DONE) {
+                Button(onClick = { vm.keepCountingUp(e) }, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.action_keep_counting)) }
+                if (ArchivePolicy.shouldOfferRepeat(e, today)) OutlinedButton(onClick = { offerRepeat = true }, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.repeat_title)) }
+                OutlinedButton(onClick = { vm.archive(e); onBack() }, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.action_archive)) }
             } else if (ArchivePolicy.shouldOfferRepeat(e, today)) {
                 TextButton(onClick = { offerRepeat = true }) { Text(stringResource(R.string.repeat_title)) }
             }

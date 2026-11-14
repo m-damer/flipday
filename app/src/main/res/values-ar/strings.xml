@@ -468,4 +468,11 @@
     <string name="onboarding_start">ابدأ الآن</string>
     <string name="onboarding_trip">رحلة إسطنبول</string>
     <string name="onboarding_due">موعد ولادة نور</string>
+    <string name="notif_snooze">ذكّرني غدًا</string>
+    <string name="set_exact">التذكيرات الدقيقة</string>
+    <string name="value_allowed">مسموح</string>
+    <string name="value_not_allowed">غير مسموح</string>
+    <string name="detail_days_ago">أيام مضت</string>
+    <string name="detail_turns_in">تبلغ %1$s بعد</string>
+    <string name="action_keep_counting">متابعة العدّ التصاعدي</string>
 </resources>

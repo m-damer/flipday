@@ -396,4 +396,11 @@
     <string name="onboarding_start">Get started</string>
     <string name="onboarding_trip">Trip to Istanbul</string>
     <string name="onboarding_due">Baby Noor’s due date</string>
+    <string name="notif_snooze">Remind me tomorrow</string>
+    <string name="set_exact">Exact reminders</string>
+    <string name="value_allowed">Allowed</string>
+    <string name="value_not_allowed">Not allowed</string>
+    <string name="detail_days_ago">days ago</string>
+    <string name="detail_turns_in">Turns %1$s in</string>
+    <string name="action_keep_counting">Keep counting up</string>
 </resources>

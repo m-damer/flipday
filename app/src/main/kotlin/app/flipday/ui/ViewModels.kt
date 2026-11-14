@@ -98,6 +98,11 @@ class DetailViewModel(private val c: AppContainer) : ViewModel() {
     /** Stops a running count-up: it becomes a period that ends today. */
     fun markEnded(event: Event) { viewModelScope.launch { c.repository.save(EventCalculator.markEnded(event, LocalDate.now())) } }
 
+    /** A finished countdown carries on as a count-up from the same date. Reminders no longer apply. */
+    fun keepCountingUp(event: Event) {
+        viewModelScope.launch { c.repository.save(event.copy(type = EventType.COUNTUP, time = null, startDate = null, reminders = emptyList(), repeatYearly = false)) }
+    }
+
     fun archive(event: Event) { viewModelScope.launch { c.repository.archive(event, LocalDate.now()) } }
 
     fun restore(event: Event) { viewModelScope.launch { c.repository.restore(event) } }

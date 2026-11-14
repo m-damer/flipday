@@ -67,6 +67,19 @@ fun SettingsScreen(factory: ViewModelProvider.Factory, onAbout: () -> Unit, onBa
                 if (on && Build.VERSION.SDK_INT >= 33) permission.launch(Manifest.permission.POST_NOTIFICATIONS) else vm.setNotifications(on)
             }
             ValueRow(stringResource(R.string.set_default_reminder), reminderLabel(s.defaultReminderDaysBefore, s.numerals, lang)) { dialog = "reminder" }
+            val ctx = androidx.compose.ui.platform.LocalContext.current
+            var resumes by remember { mutableStateOf(0) }
+            val owner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+            androidx.compose.runtime.DisposableEffect(owner) {
+                val obs = androidx.lifecycle.LifecycleEventObserver { _, e -> if (e == androidx.lifecycle.Lifecycle.Event.ON_RESUME) resumes++ }
+                owner.lifecycle.addObserver(obs); onDispose { owner.lifecycle.removeObserver(obs) }
+            }
+            val exactOk = remember(resumes) { app.flipday.reminders.ReminderScheduler(ctx.applicationContext).canScheduleExact() }
+            ValueRow(stringResource(R.string.set_exact), stringResource(if (exactOk) R.string.value_allowed else R.string.value_not_allowed), last = true) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) ctx.startActivity(
+                    android.content.Intent(android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM, android.net.Uri.parse("package:" + ctx.packageName)),
+                )
+            }
         }
         Section(R.string.settings_events_widgets) {
             ValueRow(stringResource(R.string.set_archive_finished), archiveLabel(s.archiveAfterDays, s.numerals, lang)) { dialog = "archive" }
